@@ -1,4 +1,4 @@
-FROM nvidia/cuda:9.2-cudnn7-runtime-centos7
+FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
 
 ENV PYTHONUNBUFFERED TRUE
 
@@ -8,18 +8,26 @@ RUN useradd -m model-server && \
 WORKDIR /home/model-server
 ENV TEMP=/home/model-server/tmp
 
-RUN yum install -y python36-devel gcc java-1.8.0-openjdk-devel
-RUN python --version && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.6 100 && \
-    python --version
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential \
+    libatlas-base-dev \
+    libopencv-dev \
+    graphviz \
+    python3-dev \
+    python3-venv \
+    openjdk-8-jdk-headless \
+    curl \
+    vim && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements/ requirements/
-RUN python -m venv venv && \
-    source venv/bin/activate && \
+RUN python3 -m venv venv && \
+    . venv/bin/activate && \
     pip install --upgrade pip setuptools wheel && \
     pip install sockeye --no-deps -r requirements/sockeye/requirements.gpu-cu92.txt && \
-    pip install --no-cache-dir mxnet-model-server
-RUN pip install -r requirements/sockeye-serving/requirements.txt
+    pip install --no-cache-dir mxnet-model-server && \
+    pip install -r requirements/sockeye-serving/requirements.txt
 
 COPY scripts/mms/dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
 COPY config/mms/config.properties /home/model-server
