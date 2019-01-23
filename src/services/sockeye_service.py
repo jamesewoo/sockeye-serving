@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 from contextlib import ExitStack
+
 from sockeye import arguments
 from sockeye import constants as const
 from sockeye import inference
@@ -66,18 +67,13 @@ def read_sockeye_args(params_path):
     :param params_path: path to the parameters file
     :return: a list of command line arguments
     """
-    with open(params_path, 'r') as p:
-        param_lines = p.readline()
+    with open(params_path) as f:
+        content = f.readlines()
 
-    comments = re.compile('#.*$')
-    params = []
-
-    for line in param_lines:
-        stripped = comments.sub('', line).strip()
-        if stripped:
-            params.append(stripped)
-
-    return params
+    res = []
+    for line in content:
+        res += line.split()
+    return res
 
 
 class SockeyeService(ModelHandler):
@@ -87,12 +83,12 @@ class SockeyeService(ModelHandler):
 
     def __init__(self):
         super(SockeyeService, self).__init__()
-        self.basedir = '/models'
-        self.preprocessor = ChineseCharPreprocessor('',
+        self.basedir = '/home/model-server'
+        self.preprocessor = ChineseCharPreprocessor(os.path.join(self.basedir, 'data/bpe.codes.zh-en'),
                                                     os.path.join(self.basedir, 'scripts/joshua'),
                                                     os.path.join(self.basedir, 'scripts/moses'))
         self.sentence_id = 0
-        self.sockeye_args_path = 'config/sockeye/args.txt'
+        self.sockeye_args_path = os.path.join(self.basedir, 'sockeye-args.txt')
         self.translator = None
 
     def initialize(self, context):
@@ -101,9 +97,6 @@ class SockeyeService(ModelHandler):
         device_ids = []
         if 'gpu_id' in context.system_properties:
             device_ids.append(context.system_properties['gpu_id'])
-        else:
-            logging.warning('No gpu_id found in context, setting it to 0')
-            device_ids.append(0)
 
         params = arguments.ConfigArgumentParser(description='Translate CLI')
         arguments.add_translate_cli_args(params)
@@ -193,7 +186,7 @@ class SockeyeService(ModelHandler):
         :param batch: a list of JSON requests of the form { 'text': input_string } or { 'file': file_data }
         :return: a list of input strings to translate
         """
-        logging.debug('preprocess grabbed: %s' % batch)
+        logging.info('preprocess grabbed: %s' % batch)
 
         texts = []
         for req in batch:
@@ -217,7 +210,7 @@ class SockeyeService(ModelHandler):
         :param texts: a list of strings to translate
         :return: a list of translation objects from Sockeye
         """
-        logging.debug('inference grabbed: %s' % texts)
+        logging.info('inference grabbed: %s' % texts)
 
         if texts:
             trans_inputs = []
@@ -242,7 +235,7 @@ class SockeyeService(ModelHandler):
         :param outputs: a list of translation objects from Sockeye
         :return: a list of translations of the form: { 'translation': output_string }
         """
-        logging.debug('postprocess grabbed: %s' % outputs)
+        logging.info('postprocess grabbed: %s' % outputs)
 
         res = []
         de_bpe = re.compile('@@( |$)', re.IGNORECASE)
