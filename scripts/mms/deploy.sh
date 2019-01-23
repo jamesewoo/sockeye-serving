@@ -17,8 +17,7 @@ done
 curl -X PUT "http://localhost:8081/models/zh?min_worker=1"
 curl -X GET "http://localhost:8081/models/zh"
 curl -X POST "http://localhost:8080/predictions/zh" -H "Content-Type: application/json" \
-    -d '{ "text": "我的世界是一款開放世界遊戲，玩家沒有具體要完成的目標，即玩家有超高的自由度選擇如何玩遊戲" }'
+    -d '{ "text": "我的世界是一款開放世界遊戲，玩家沒有具體要完成的目標，即玩家有超高的自由度選擇如何玩遊戲" }' &
 curl -X POST "http://localhost:8080/predictions/zh" -H "Content-Type: application/json" \
-    -d '"我的世界是一款開放世界遊戲，玩家沒有具體要完成的目標，即玩家有超高的自由度選擇如何玩遊戲"'
-curl -X POST "http://localhost:8080/predictions/zh" -T "data/sample.txt"
-#curl -X POST "http://localhost:8080/predictions/zh" -F "data=@data/sample.txt"
+    -d '"我的世界是一款開放世界遊戲，玩家沒有具體要完成的目標，即玩家有超高的自由度選擇如何玩遊戲"' &
+curl -X POST "http://localhost:8080/predictions/zh" -T "data/sample.txt" &

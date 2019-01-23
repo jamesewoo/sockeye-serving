@@ -11,9 +11,6 @@ ENV TEMP=/home/model-server/tmp
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     build-essential \
-    libatlas-base-dev \
-    libopencv-dev \
-    graphviz \
     python3-dev \
     python3-venv \
     openjdk-8-jdk-headless \
@@ -31,7 +28,6 @@ RUN python3 -m venv venv && \
 
 COPY config/mms/config.properties .
 COPY config/sockeye/args.txt sockeye-args.txt
-COPY data data
 COPY scripts/mms/dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
 COPY scripts scripts
 
