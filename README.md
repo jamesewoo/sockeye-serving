@@ -11,12 +11,11 @@ Download the example model files:
 * https://www.dropbox.com/s/j2xuqdrv9ygean0/config.properties?dl=0
 * https://www.dropbox.com/s/pk7hmp7a5zjcfcj/zh.mar?dl=0
 
-Extract the files:
+Extract the files to a model directory:
 ```bash
 mkdir -p /tmp/models/zh
 mv config.properties /tmp/models
 unzip -d /tmp/models/zh zh.mar
-mv zh.mar /tmp/models
 ```
 
 Start the server:
@@ -27,11 +26,12 @@ docker run -itd --name mms -p 8080:8080  -p 8081:8081 -v /tmp/models/:/models jw
 
 Copy the BPE codes into the container:
 ```bash
-docker cp /tmp/models/zh/bpe.codes.zh-en mms:/home/model-server/data
+docker exec mms mkdir -p data
+docker cp /tmp/models/zh/bpe.codes.zh-en mms:/home/model-server/data/
 ```
 Try making some requests:
 ```bash
-until curl -X POST "http://localhost:8081/models?url=zh.mar"
+until curl -X POST "http://localhost:8081/models?url=zh"
 do
   echo "Waiting for initialization..."
   sleep 1
