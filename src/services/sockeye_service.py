@@ -83,10 +83,10 @@ class SockeyeService(ModelHandler):
 
     def __init__(self):
         super(SockeyeService, self).__init__()
-        self.basedir = '/home/model-server'
-        self.preprocessor = ChineseCharPreprocessor(os.path.join(self.basedir, 'data/bpe.codes.zh-en'),
-                                                    os.path.join(self.basedir, 'scripts/joshua'),
-                                                    os.path.join(self.basedir, 'scripts/moses'))
+        self.basedir = '/models/zh'
+        self.preprocessor = ChineseCharPreprocessor(os.path.join(self.basedir, 'bpe.codes.zh-en'),
+                                                    os.path.join(self.basedir, 'scripts'),
+                                                    os.path.join(self.basedir, 'scripts'))
         self.sentence_id = 0
         self.sockeye_args_path = os.path.join(self.basedir, 'sockeye-args.txt')
         self.translator = None
@@ -239,7 +239,7 @@ class SockeyeService(ModelHandler):
 
         res = []
         de_bpe = re.compile('@@( |$)', re.IGNORECASE)
-        de_tok = os.path.join(self.basedir, 'scripts/joshua/detokenize.pl')
+        de_tok = os.path.join(self.basedir, 'scripts/detokenize.pl')
 
         for t in outputs:
             bpe_removed = re.sub(de_bpe, '', t.translation.strip())
