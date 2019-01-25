@@ -5,8 +5,7 @@ model-archiver -f --runtime python3 --export-path /tmp/models/ \
     --model-name zh --model-path /tmp/models/zh --handler services.sockeye_service:handle
 
 docker kill mms && docker rm mms
-docker run -itd --name mms -p 8080:8080  -p 8081:8081 -v /tmp/models/:/models jwoo11/sockeye-serving \
-    mxnet-model-server --start --mms-config /models/config.properties
+docker run -itd --name mms -p 8080:8080  -p 8081:8081 -v /tmp/models/:/models jwoo11/sockeye-serving serve
 
 until curl -X POST "http://localhost:8081/models?url=zh.mar"
 do
