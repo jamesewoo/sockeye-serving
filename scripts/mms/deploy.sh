@@ -10,7 +10,11 @@ docker kill mms
 docker rm mms
 docker run -itd --name mms -p 8080:8080 -p 8081:8081 -v /tmp/models:/opt/ml/model jwoo11/sockeye-serving serve
 
-until curl -X POST "http://localhost:8081/models?synchronous=true&initial_workers=1&url=zh.mar"
+#URL="zh.mar"
+URL="zh"
+#URL="https://www.dropbox.com/s/pk7hmp7a5zjcfcj/zh.mar?dl=1"
+
+until curl -X POST "http://localhost:8081/models?synchronous=true&initial_workers=1&url=${URL}"
 do
   echo "Waiting for initialization..."
   sleep 1
