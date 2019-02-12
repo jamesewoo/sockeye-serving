@@ -1,5 +1,4 @@
 import html
-import logging
 import os
 import subprocess
 from html.entities import html5, name2codepoint
@@ -8,10 +7,19 @@ import regex as re
 from subword_nmt.apply_bpe import BPE
 
 
-class Preprocessor(object):
-    def __init__(self, bpe_code_file):
-        super(Preprocessor, self).__init__()
+def run_subprocess(text, args):
+    """
+    Runs a subprocess that process text
+    :param text: input text
+    :param args: command line arguments
+    :return: processed text
+    """
+    popen = subprocess.run(args, input=text, encoding='utf-8', stdout=subprocess.PIPE)
+    return popen.stdout.strip()
 
+
+class TextProcessor:
+    def __init__(self):
         symbols = ''
         symbol_set = set({})
 
@@ -40,11 +48,6 @@ class Preprocessor(object):
         self.shy = re.compile('[ ]?&[ ]?s[ ]?h[ ]?y[ ]?;[ ]?', re.IGNORECASE)
 
         self.bpe = None
-        if bpe_code_file:
-            with open(bpe_code_file, mode='r', encoding='utf-8') as f:
-                self.bpe = BPE(f)
-        else:
-            logging.error('No BPE code file specified')
 
     def unescape(self, line):
         # put html-escaped (or double escaped) codes back into canonical format
@@ -66,37 +69,43 @@ class Preprocessor(object):
         line = re.sub(self.nbsp, ' ', line)
         return line
 
-    def bpe_encode(self, text):
+    def run(self, text):
+        return self.unescape(text)
+
+
+class BpeEncoder(TextProcessor):
+    def __init__(self, bpe_code_file):
+        super().__init__()
+
+        with open(bpe_code_file, mode='r', encoding='utf-8') as f:
+            self.bpe = BPE(f)
+
+    def run(self, text):
         return self.bpe.process_line(text).strip()
 
 
-class JoshuaPreprocessor(Preprocessor):
-    def __init__(self, bpe_code_file, joshua_path, moses_path, lang):
-        super(JoshuaPreprocessor, self).__init__(bpe_code_file)
+class JoshuaPreprocessor(TextProcessor):
+    def __init__(self, scripts_path, lang):
+        super().__init__()
 
         self.lang = lang
-        self.normalizer = os.path.join(joshua_path, 'normalize.pl')
-        self.tokenizer = os.path.join(moses_path, 'tokenizer.perl')
-        self.cleaner = os.path.join(moses_path, 'remove-non-printing-char.perl')
+        self.normalizer = os.path.join(scripts_path, 'normalize.pl')
+        self.tokenizer = os.path.join(scripts_path, 'tokenizer.perl')
+        self.cleaner = os.path.join(scripts_path, 'remove-non-printing-char.perl')
 
         for f in [self.normalizer, self.tokenizer, self.cleaner]:
             os.chmod(f, 0o755)
 
     def run(self, text):
         text = self.unescape(text)
-
-        # normalize, remove non-printing characters, and tokenize
-        popen = subprocess.run(
-            [self.normalizer, self.lang, '|', self.cleaner, '|', self.tokenizer, '-l', self.lang, '-no-escape', '-q'],
-            input=text, encoding='utf-8', stdout=subprocess.PIPE)
-        result = popen.stdout.strip()
-
-        return self.bpe_encode(result)
+        return run_subprocess(text,
+                              [self.normalizer, self.lang, '|', self.cleaner, '|', self.tokenizer, '-l', self.lang,
+                               '-no-escape', '-q'])
 
 
 class ChineseCharPreprocessor(JoshuaPreprocessor):
-    def __init__(self, bpe_code_file, joshua_path, moses_path):
-        super(ChineseCharPreprocessor, self).__init__(bpe_code_file, joshua_path, moses_path, 'zh')
+    def __init__(self, scripts_path):
+        super().__init__(scripts_path, 'zh')
 
         self.pattern = re.compile(
             '([\p{IsHan}\p{InCJK_Symbols_and_Punctuation}\p{InCJK_Radicals_Supplement}\p{InCJK_Compatibility}])',
@@ -106,30 +115,24 @@ class ChineseCharPreprocessor(JoshuaPreprocessor):
         text = self.unescape(text)
 
         # normalize and remove non-printing characters
-        popen = subprocess.run([self.normalizer, self.lang, '|', self.cleaner], input=text, encoding='utf-8',
-                               stdout=subprocess.PIPE)
-        text = popen.stdout.strip()
+        text = run_subprocess(text, [self.normalizer, self.lang, '|', self.cleaner])
 
         # tokenize by separating all ZH characters with a space
         text = self.pattern.sub(r' \1 ', text).strip()
 
         # tokenize other characters using Moses
-        popen = subprocess.run([self.tokenizer, '-l', self.lang, '-no-escape', '-q'], input=text, encoding='utf-8',
-                               stdout=subprocess.PIPE)
-        result = popen.stdout.strip()
-
-        return self.bpe_encode(result)
+        return run_subprocess(text, [self.tokenizer, '-l', self.lang, '-no-escape', '-q'])
 
 
-class Detokenizer():
-    def __init__(self, path):
+class Detokenizer(TextProcessor):
+    def __init__(self, scripts_path):
+        super().__init__()
+
         self.de_bpe = re.compile('@@( |$)', re.IGNORECASE)
-        self.de_tok = path
+        self.de_tok = os.path.join(scripts_path, 'detokenize.pl')
 
         os.chmod(self.de_tok, 0o755)
 
     def run(self, text):
-        bpe_removed = re.sub(self.de_bpe, '', text.translation.strip())
-        popen = subprocess.run([self.de_tok, '-l', 'en'], input=bpe_removed, encoding='utf-8', stdout=subprocess.PIPE,
-                               env=os.environ)
-        return popen.stdout.strip()
+        text = re.sub(self.de_bpe, '', text.translation.strip())
+        return run_subprocess(text, [self.de_tok, '-l', 'en'])

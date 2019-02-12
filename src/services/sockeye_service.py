@@ -2,6 +2,7 @@ import logging
 import os
 import re
 from contextlib import ExitStack
+
 from sockeye import arguments
 from sockeye import constants as const
 from sockeye import inference
@@ -10,7 +11,7 @@ from sockeye.output_handler import get_output_handler
 from sockeye.utils import check_condition, log_basic_info, determine_context
 
 from .model_handler import ModelHandler
-from .preprocessor import ChineseCharPreprocessor, Detokenizer
+from .text_processor import ChineseCharPreprocessor, Detokenizer
 
 
 def decode_bytes(data):
@@ -91,10 +92,8 @@ class SockeyeService(ModelHandler):
         super(SockeyeService, self).initialize(context)
 
         self.basedir = context.system_properties.get('model_dir')
-        self.preprocessor = ChineseCharPreprocessor(os.path.join(self.basedir, 'bpe.codes.zh-en'),
-                                                    os.path.join(self.basedir, 'scripts'),
-                                                    os.path.join(self.basedir, 'scripts'))
-        self.postprocessor = Detokenizer(os.path.join(self.basedir, 'scripts', 'detokenize.pl'))
+        self.preprocessor = ChineseCharPreprocessor(os.path.join(self.basedir, 'scripts'))
+        self.postprocessor = Detokenizer(os.path.join(self.basedir, 'scripts'))
 
         params = arguments.ConfigArgumentParser(description='Translate CLI')
         arguments.add_translate_cli_args(params)
@@ -104,34 +103,21 @@ class SockeyeService(ModelHandler):
         # override models directory
         sockeye_args.models = [self.basedir]
 
-        device_ids =[]
+        device_ids = []
         if 'gpu_id' in context.system_properties:
             device_ids.append(context.system_properties['gpu_id'])
         else:
             logging.warning('No gpu_id found in context')
             device_ids.append(0)
 
-        if sockeye_args.checkpoints is not None:
-            check_condition(len(sockeye_args.checkpoints) == len(sockeye_args.models),
-                            'must provide checkpoints for each model')
-
-        if sockeye_args.skip_topk:
-            check_condition(sockeye_args.beam_size == 1, '--skip-topk has no effect if beam size is larger than 1')
-            check_condition(len(sockeye_args.models) == 1,
-                            '--skip-topk has no effect for decoding with more than 1 model')
+        log_basic_info(sockeye_args)
 
         if sockeye_args.nbest_size > 1:
-            check_condition(sockeye_args.beam_size >= sockeye_args.nbest_size,
-                            'Size of nbest list (--nbest-size) must be smaller or equal to beam size (--beam-size).')
-            check_condition(sockeye_args.beam_search_drop == const.BEAM_SEARCH_STOP_ALL,
-                            '--nbest-size > 1 requires beam search to only stop after all hypotheses are finished '
-                            '(--beam-search-stop all)')
-            if sockeye_args.output_type != const.OUTPUT_HANDLER_NBEST:
-                logging.warning('For nbest translation, output handler must be "%s", overriding option --output-type.',
-                                const.OUTPUT_HANDLER_NBEST)
-                sockeye_args.output_type = const.OUTPUT_HANDLER_NBEST
-
-        log_basic_info(sockeye_args)
+            if sockeye_args.output_type != const.OUTPUT_HANDLER_JSON:
+                logging.warning(
+                    "For nbest translation, you must specify `--output-type '%s'; overriding your setting of '%s'.",
+                    const.OUTPUT_HANDLER_JSON, sockeye_args.output_type)
+                sockeye_args.output_type = const.OUTPUT_HANDLER_JSON
 
         output_handler = get_output_handler(sockeye_args.output_type,
                                             sockeye_args.output,
@@ -145,11 +131,6 @@ class SockeyeService(ModelHandler):
                                                lock_dir=sockeye_args.lock_dir,
                                                exit_stack=exit_stack)[0]
             logging.info('Translate Device: %s', translator_ctx)
-
-            if sockeye_args.override_dtype == const.DTYPE_FP16:
-                logging.warning('Experimental feature \'--override-dtype float16\' has been used. '
-                                'This feature may be removed or change its behavior in the future. '
-                                'DO NOT USE IT IN PRODUCTION')
 
             models, source_vocabs, target_vocab = inference.load_models(
                 context=translator_ctx,
@@ -206,8 +187,8 @@ class SockeyeService(ModelHandler):
                 text = get_text(req)
 
             if text:
-                bpe = self.preprocessor.run(text)
-                texts.append(bpe)
+                t = self.preprocessor.run(text)
+                texts.append(t)
 
         return texts
 
