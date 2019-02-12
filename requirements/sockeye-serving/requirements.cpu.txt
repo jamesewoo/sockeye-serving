@@ -1,0 +1,10 @@
+# MMS
+mxnet-model-server==1.0.1
+
+# Custom handler reqs
+regex
+subword-nmt
+
+# Sockeye reqs
+pyyaml==3.13
+sockeye==1.18.72
