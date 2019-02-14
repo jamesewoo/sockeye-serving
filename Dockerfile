@@ -1,12 +1,13 @@
 FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
 
+ENV TEMP=/home/model-server/tmp
+ENV SOCKEYE_VERSION=1.18.72
 ENV PYTHONUNBUFFERED TRUE
 
 RUN useradd -m model-server && \
-    mkdir -p /home/model-server/tmp
+    mkdir -p $TEMP
 
 WORKDIR /home/model-server
-ENV TEMP=/home/model-server/tmp
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -22,13 +23,11 @@ COPY requirements/ requirements/
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade pip setuptools wheel && \
-    pip install -r requirements/sockeye-serving/requirements.gpu-cu92.txt
+    pip install sockeye==$SOCKEYE_VERSION --no-deps -r requirements/sockeye/requirements.gpu-cu92.txt && \
+    pip install -r requirements/sockeye-serving/requirements.txt
 
-COPY config/config.properties /home/model-server
+COPY config/config.properties .
 COPY scripts/mms/dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
-
-RUN chmod +x /usr/local/bin/dockerd-entrypoint.sh && \
-    chown -R model-server /home/model-server
 
 EXPOSE 8080 8081
 
@@ -36,4 +35,7 @@ USER model-server
 ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]
 CMD ["serve"]
 
-LABEL maintainer="james.e.woo@gmail.com"
+LABEL version="1.0.0" \
+      maintainer="james.e.woo@gmail.com" \
+      source="https://github.com/jamesewoo/sockeye-serving" \
+      description="Sockeye server based on mxnet-model-server"
