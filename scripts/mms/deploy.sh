@@ -9,7 +9,7 @@ if [[ "$1" = "update" ]]; then
     cp -r scripts/moses/* ${scripts_dir}
     cp -r src/services /tmp/models/${lang}
     model-archiver -f --runtime python3 --export-path /tmp/models/ \
-        --model-name ${lang} --model-path /tmp/models/${lang} --handler services.sockeye_service:handle
+        --model-name ${lang} --model-path /tmp/models/${lang} --handler services.${lang}_handler:handle
 fi
 
 docker kill mms

@@ -1,6 +1,19 @@
+# Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# A copy of the License is located at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# or in the "license" file accompanying this file. This file is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+
+"""
+ModelHandler defines a base model handler.
+"""
+
 import logging
 import os
-import re
 from contextlib import ExitStack
 
 from sockeye import arguments
@@ -10,91 +23,45 @@ from sockeye.lexicon import TopKLexicon
 from sockeye.output_handler import get_output_handler
 from sockeye.utils import check_condition, log_basic_info, determine_context
 
-from .model_handler import ModelHandler
-from .text_processor import ChineseCharPreprocessor, Detokenizer
+from .utils import decode_bytes, get_file_data, get_text
+from .utils import read_sockeye_args
 
 
-def decode_bytes(data):
-    """
-    Decodes a bytes array from a file upload
-
-    :param data: a UTF-8 encoded byte array
-    :return: a cleaned string
-    """
-    pattern = re.compile('\r', re.UNICODE)
-    res = data.decode('utf-8', 'ignore')
-    res = pattern.sub('', res).strip()
-    return res
-
-
-def get_text(req):
-    """
-    Returns the text string, if any, in the request
-
-    :param req: a JSON request
-    :return: a text string
-    """
-    for field in ['body']:
-        if field in req:
-            data = req[field]
-            if isinstance(data, str):
-                return data
-            elif isinstance(data, dict) and 'text' in data:
-                return data['text']
-    return None
-
-
-def get_file_data(req):
-    """
-    Returns the file data, if any, in the request
-
-    :param req: a JSON request
-    :return: a byte array
-    """
-    for field in ['body', 'file', 'data']:
-        if field in req:
-            data = req[field]
-            if isinstance(data, bytearray):
-                return data
-    return None
-
-
-def read_sockeye_args(params_path):
-    """
-    Reads command line arguments stored in a file
-
-    :param params_path: path to the parameters file
-    :return: a list of command line arguments
-    """
-    with open(params_path) as f:
-        content = f.readlines()
-
-    res = []
-    for line in content:
-        res += line.split()
-    return res
-
-
-class SockeyeService(ModelHandler):
+class SockeyeHandler(object):
     """
     Consumes text of arbitrary length and returns its translation.
     """
 
     def __init__(self):
-        super(SockeyeService, self).__init__()
+        self._context = None
+        self._batch_size = 0
+        self.error = None
         self.basedir = None
+        self.initialized = False
         self.postprocessor = None
         self.preprocessor = None
         self.sentence_id = 0
         self.translator = None
 
     def initialize(self, context):
-        super(SockeyeService, self).initialize(context)
+        """
+        Initialize model. This will be called during model loading time
 
+        :param context: Initial context contains model server system properties.
+        :return:
+        """
+        self._context = context
+        self._batch_size = context.system_properties["batch_size"]
         self.basedir = context.system_properties.get('model_dir')
-        self.preprocessor = ChineseCharPreprocessor(os.path.join(self.basedir, 'scripts'))
-        self.postprocessor = Detokenizer(os.path.join(self.basedir, 'scripts'))
+        self.translator = self.get_tranlator(context)
+        self.initialized = True
 
+    def get_tranlator(self, context):
+        """
+        Returns a translator for the given context
+        :param context: model server context
+        :return:
+        """
         params = arguments.ConfigArgumentParser(description='Translate CLI')
         arguments.add_translate_cli_args(params)
 
@@ -150,23 +117,23 @@ class SockeyeService(ModelHandler):
                 restrict_lexicon = TopKLexicon(source_vocabs[0], target_vocab)
                 restrict_lexicon.load(sockeye_args.restrict_lexicon, k=sockeye_args.restrict_lexicon_topk)
             store_beam = sockeye_args.output_type == const.OUTPUT_HANDLER_BEAM_STORE
-            self.translator = inference.Translator(context=translator_ctx,
-                                                   ensemble_mode=sockeye_args.ensemble_mode,
-                                                   bucket_source_width=sockeye_args.bucket_width,
-                                                   length_penalty=inference.LengthPenalty(
-                                                       sockeye_args.length_penalty_alpha,
-                                                       sockeye_args.length_penalty_beta),
-                                                   beam_prune=sockeye_args.beam_prune,
-                                                   beam_search_stop=sockeye_args.beam_search_stop,
-                                                   nbest_size=sockeye_args.nbest_size,
-                                                   models=models,
-                                                   source_vocabs=source_vocabs,
-                                                   target_vocab=target_vocab,
-                                                   restrict_lexicon=restrict_lexicon,
-                                                   avoid_list=sockeye_args.avoid_list,
-                                                   store_beam=store_beam,
-                                                   strip_unknown_words=sockeye_args.strip_unknown_words,
-                                                   skip_topk=sockeye_args.skip_topk)
+            return inference.Translator(context=translator_ctx,
+                                        ensemble_mode=sockeye_args.ensemble_mode,
+                                        bucket_source_width=sockeye_args.bucket_width,
+                                        length_penalty=inference.LengthPenalty(
+                                            sockeye_args.length_penalty_alpha,
+                                            sockeye_args.length_penalty_beta),
+                                        beam_prune=sockeye_args.beam_prune,
+                                        beam_search_stop=sockeye_args.beam_search_stop,
+                                        nbest_size=sockeye_args.nbest_size,
+                                        models=models,
+                                        source_vocabs=source_vocabs,
+                                        target_vocab=target_vocab,
+                                        restrict_lexicon=restrict_lexicon,
+                                        avoid_list=sockeye_args.avoid_list,
+                                        store_beam=store_beam,
+                                        strip_unknown_words=sockeye_args.strip_unknown_words,
+                                        skip_topk=sockeye_args.skip_topk)
 
     def preprocess(self, batch):
         """
@@ -232,15 +199,29 @@ class SockeyeService(ModelHandler):
             res.append({'translation': output})
         return res
 
+    def handle(self, data, context):
+        """
+        Custom service entry point function.
 
-_service = SockeyeService()
+        :param data: list of objects, raw input from request
+        :param context: model server context
+        :return: list of outputs to be send back to client
+        """
 
+        if not self.initialized:
+            self.initialize(context)
 
-def handle(data, context):
-    if not _service.initialized:
-        _service.initialize(context)
+        if data is None:
+            return None
 
-    if data is None:
-        return None
+        try:
+            data = self.preprocess(data)
+            data = self.inference(data)
+            data = self.postprocess(data)
+            return data
 
-    return _service.handle(data, context)
+        except Exception as e:
+            logging.error(e, exc_info=True)
+            request_processor = context.request_processor
+            request_processor.report_status(500, "Unknown inference error")
+            return [str(e)] * self._batch_size
