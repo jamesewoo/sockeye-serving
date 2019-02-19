@@ -5,7 +5,8 @@ ENV SOCKEYE_VERSION=1.18.72
 ENV PYTHONUNBUFFERED TRUE
 
 RUN useradd -m model-server && \
-    mkdir -p $TEMP
+    mkdir -p $TEMP && \
+    chown model-server $TEMP
 
 WORKDIR /home/model-server
 
