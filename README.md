@@ -60,10 +60,17 @@ curl -X POST "http://localhost:8080/predictions/zh" -H "Content-Type: applicatio
     -d '{ "text": "我的世界是一款開放世界遊戲，玩家沒有具體要完成的目標，即玩家有超高的自由度選擇如何玩遊戲" }'
 ```
 
-The translation quality depends on the model. Apparently, this one needs more training:
+The translation quality depends on the model. The provided model returns this translation:
 ```json
 {
   "translation": "in my life was a life of a life of a public public, and a public, a time, a video, a play, which, it was a time of a time of a time."
+}
+```
+
+After training for a longer duration with more data, we arrived at this response:
+```json
+{
+  "translation": "My world is an open world game, and players have no specific goal to accomplish, that is, players have a high degree of freedom to choose how to play."
 }
 ```
 
