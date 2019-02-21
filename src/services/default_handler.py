@@ -12,6 +12,7 @@ class DefaultHandler(SockeyeHandler):
     def initialize(self, context):
         super().initialize(context)
         scripts_path = os.path.join(self.basedir, 'scripts')
+        # get the language from the model name
         lang = context.model_name
         self.preprocessor = JoshuaPreprocessor(scripts_path, lang)
         self.postprocessor = Detokenizer(scripts_path)

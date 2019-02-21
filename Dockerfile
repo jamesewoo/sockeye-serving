@@ -24,8 +24,9 @@ COPY requirements/ requirements/
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade pip setuptools wheel && \
-    pip install sockeye==$SOCKEYE_VERSION --no-deps -r requirements/sockeye/requirements.gpu-cu92.txt && \
-    pip install -r requirements/sockeye-serving/requirements.txt
+    pip install --no-cache-dir sockeye==$SOCKEYE_VERSION \
+        --no-deps -r requirements/sockeye/requirements.gpu-cu92.txt && \
+    pip install --no-cache-dir -r requirements/sockeye-serving/requirements.txt
 
 COPY config/config.properties .
 COPY scripts/mms/dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
