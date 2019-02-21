@@ -48,7 +48,7 @@ class SockeyeHandler(object):
         """
         self._context = context
         self._batch_size = context.system_properties['batch_size']
-        self.basedir = context.system_properties.get('model_dir')
+        self.basedir = context.system_properties['model_dir']
         self.translator = self.get_tranlator(context)
         self.initialized = True
 

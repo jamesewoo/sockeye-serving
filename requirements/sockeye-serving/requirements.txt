@@ -2,5 +2,5 @@
 mxnet-model-server==1.0.1
 
 # Custom handler reqs
-regex==2019.2.18
+regex==2019.02.21
 subword-nmt==0.3.6
