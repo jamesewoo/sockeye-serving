@@ -8,9 +8,6 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-"""
-ModelHandler defines a base model handler.
-"""
 
 import logging
 import os
@@ -23,8 +20,7 @@ from sockeye.lexicon import TopKLexicon
 from sockeye.output_handler import get_output_handler
 from sockeye.utils import check_condition, log_basic_info, determine_context
 
-from .utils import decode_bytes, get_file_data, get_text
-from .utils import read_sockeye_args
+from .utils import decode_bytes, get_file_data, get_text, read_sockeye_args
 
 
 class SockeyeHandler(object):
@@ -51,7 +47,7 @@ class SockeyeHandler(object):
         :return:
         """
         self._context = context
-        self._batch_size = context.system_properties["batch_size"]
+        self._batch_size = context.system_properties['batch_size']
         self.basedir = context.system_properties.get('model_dir')
         self.translator = self.get_tranlator(context)
         self.initialized = True

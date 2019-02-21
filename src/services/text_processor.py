@@ -1,24 +1,18 @@
 import html
 import os
-import subprocess
 from html.entities import html5, name2codepoint
 
 import regex as re
 from subword_nmt.apply_bpe import BPE
 
-
-def run_subprocess(text, args):
-    """
-    Runs a subprocess that process text
-    :param text: input text
-    :param args: command line arguments
-    :return: processed text
-    """
-    popen = subprocess.run(args, input=text, encoding='utf-8', stdout=subprocess.PIPE)
-    return popen.stdout.strip()
+from .utils import run_subprocess
 
 
 class TextProcessor:
+    """
+    Transforms text as part of either preprocessing or postprocessing
+    """
+
     def __init__(self):
         symbols = ''
         symbol_set = set({})
@@ -74,6 +68,10 @@ class TextProcessor:
 
 
 class BpeEncoder(TextProcessor):
+    """
+    Returns byte-pair encodings of text
+    """
+
     def __init__(self, bpe_code_file):
         super().__init__()
 
@@ -85,6 +83,10 @@ class BpeEncoder(TextProcessor):
 
 
 class JoshuaPreprocessor(TextProcessor):
+    """
+    A preprocessor that uses Joshua scripts to preprocess text
+    """
+
     def __init__(self, scripts_path, lang):
         super().__init__()
 
@@ -103,28 +105,11 @@ class JoshuaPreprocessor(TextProcessor):
                                '-no-escape', '-q'])
 
 
-class ChineseCharPreprocessor(JoshuaPreprocessor):
-    def __init__(self, scripts_path):
-        super().__init__(scripts_path, 'zh')
-
-        self.pattern = re.compile(
-            '([\p{IsHan}\p{InCJK_Symbols_and_Punctuation}\p{InCJK_Radicals_Supplement}\p{InCJK_Compatibility}])',
-            re.UNICODE)
-
-    def run(self, text):
-        text = self.unescape(text)
-
-        # normalize and remove non-printing characters
-        text = run_subprocess(text, [self.normalizer, self.lang, '|', self.cleaner])
-
-        # tokenize by separating all ZH characters with a space
-        text = self.pattern.sub(r' \1 ', text).strip()
-
-        # tokenize other characters using Moses
-        return run_subprocess(text, [self.tokenizer, '-l', self.lang, '-no-escape', '-q'])
-
-
 class Detokenizer(TextProcessor):
+    """
+    Removes BPE and detokenizes text
+    """
+
     def __init__(self, scripts_path):
         super().__init__()
 

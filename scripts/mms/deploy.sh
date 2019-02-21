@@ -14,7 +14,7 @@ fi
 
 docker kill mms
 docker rm mms
-docker run -itd --name mms -p 8080:8080 -p 8081:8081 -v /tmp/models:/opt/ml/model jwoo11/sockeye-serving serve
+docker run -itd --name mms -p 8080:8080 -p 8081:8081 -v /tmp/models:/opt/ml/model jwoo11/sockeye-serving
 
 #URL="${lang}.mar"
 URL="${lang}"

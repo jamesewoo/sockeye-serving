@@ -1,4 +1,5 @@
 import re
+import subprocess
 
 
 def decode_bytes(data):
@@ -60,3 +61,14 @@ def read_sockeye_args(params_path):
     for line in content:
         res += line.split()
     return res
+
+
+def run_subprocess(text, args):
+    """
+    Runs a subprocess that process text
+    :param text: input text
+    :param args: command line arguments
+    :return: processed text
+    """
+    popen = subprocess.run(args, input=text, encoding='utf-8', stdout=subprocess.PIPE)
+    return popen.stdout.strip()

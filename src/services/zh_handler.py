@@ -1,7 +1,35 @@
 import os
 
+import regex as re
+
 from .sockeye_handler import SockeyeHandler
-from .text_processor import ChineseCharPreprocessor, Detokenizer
+from .text_processor import JoshuaPreprocessor, Detokenizer
+from .utils import run_subprocess
+
+
+class ChineseCharPreprocessor(JoshuaPreprocessor):
+    """
+    Preprocesses Chinese text
+    """
+
+    def __init__(self, scripts_path):
+        super().__init__(scripts_path, 'zh')
+
+        self.pattern = re.compile(
+            '([\p{IsHan}\p{InCJK_Symbols_and_Punctuation}\p{InCJK_Radicals_Supplement}\p{InCJK_Compatibility}])',
+            re.UNICODE)
+
+    def run(self, text):
+        text = self.unescape(text)
+
+        # normalize and remove non-printing characters
+        text = run_subprocess(text, [self.normalizer, self.lang, '|', self.cleaner])
+
+        # tokenize by separating all ZH characters with a space
+        text = self.pattern.sub(r' \1 ', text).strip()
+
+        # tokenize other characters using Moses
+        return run_subprocess(text, [self.tokenizer, '-l', self.lang, '-no-escape', '-q'])
 
 
 class ChineseHandler(SockeyeHandler):
