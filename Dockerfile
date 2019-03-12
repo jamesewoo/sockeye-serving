@@ -1,7 +1,7 @@
 FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
 
 ENV TEMP=/home/model-server/tmp
-ENV SOCKEYE_VERSION=1.18.72
+ENV SOCKEYE_VERSION=1.18.78
 ENV PYTHONUNBUFFERED TRUE
 
 RUN useradd -m model-server && \

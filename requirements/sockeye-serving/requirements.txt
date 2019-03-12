@@ -1,5 +1,5 @@
 # MMS
-mxnet-model-server==1.0.1
+mxnet-model-server==1.0.2
 
 # Custom handler reqs
 regex==2019.02.21
