@@ -107,7 +107,8 @@ class SockeyeHandler(object):
                 decoder_return_logit_inputs=sockeye_args.restrict_lexicon is not None,
                 cache_output_layer_w_b=sockeye_args.restrict_lexicon is not None,
                 override_dtype=sockeye_args.override_dtype,
-                output_scores=output_handler.reports_score())
+                output_scores=output_handler.reports_score(),
+                sampling=sockeye_args.sample)
             restrict_lexicon = None
             if sockeye_args.restrict_lexicon:
                 restrict_lexicon = TopKLexicon(source_vocabs[0], target_vocab)
@@ -129,7 +130,8 @@ class SockeyeHandler(object):
                                         avoid_list=sockeye_args.avoid_list,
                                         store_beam=store_beam,
                                         strip_unknown_words=sockeye_args.strip_unknown_words,
-                                        skip_topk=sockeye_args.skip_topk)
+                                        skip_topk=sockeye_args.skip_topk,
+                                        sample=sockeye_args.sample)
 
     def preprocess(self, batch):
         """
