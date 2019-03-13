@@ -12,8 +12,7 @@ mgmt_url="http://localhost:${mgmt_port}"
 export_path="/tmp/models"
 
 function restart_docker {
-    docker kill mms
-    docker rm mms
+    docker rm -f mms
     docker run -itd --name mms -p ${pred_port}:8080 -p ${mgmt_port}:8081 \
         -v ${export_path}:/opt/ml/model jwoo11/sockeye-serving
 }
@@ -37,6 +36,11 @@ function test_prediction {
 }
 
 function update_model {
+    if [[ -z $(command -v model-archiver) ]]; then
+        echo "model-archiver not found - is virtualenv activated?"
+        exit 127
+    fi
+
     local model_path=$1
     local model_name=$2
     local handler=$3
