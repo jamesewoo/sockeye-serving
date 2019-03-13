@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Docker properties
 # =====
 # predictions API port on the host
@@ -36,11 +38,6 @@ function test_prediction {
 }
 
 function update_model {
-    if [[ -z $(command -v model-archiver) ]]; then
-        echo "model-archiver not found - is virtualenv activated?"
-        exit 127
-    fi
-
     local model_path=$1
     local model_name=$2
     local handler=$3
