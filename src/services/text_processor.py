@@ -1,8 +1,7 @@
 import html
 import os
-from html.entities import html5, name2codepoint
-
 import regex as re
+from html.entities import html5, name2codepoint
 from subword_nmt.apply_bpe import BPE
 
 from .utils import run_subprocess
@@ -119,5 +118,5 @@ class Detokenizer(TextProcessor):
         os.chmod(self.de_tok, 0o755)
 
     def run(self, text):
-        text = re.sub(self.de_bpe, '', text.translation.strip())
+        text = re.sub(self.de_bpe, '', text.strip())
         return run_subprocess(text, [self.de_tok, '-l', 'en'])

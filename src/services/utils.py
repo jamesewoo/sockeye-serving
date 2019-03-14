@@ -70,5 +70,5 @@ def run_subprocess(text, args):
     :param args: command line arguments
     :return: processed text
     """
-    popen = subprocess.run(args, input=text, encoding='utf-8', stdout=subprocess.PIPE)
-    return popen.stdout.strip()
+    proc = subprocess.run(args, input=text, encoding='utf-8', stdout=subprocess.PIPE)
+    return proc.stdout.strip()

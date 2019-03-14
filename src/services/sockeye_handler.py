@@ -183,9 +183,9 @@ class SockeyeHandler(object):
         :return: a list of translations of the form: { 'translation': output_string }
         """
         res = []
-        for t in outputs:
-            output = self.postprocessor.run(t)
-            res.append({'translation': output})
+        for output in outputs:
+            translation = self.postprocessor.run(output.translation)
+            res.append({'translation': translation})
         return res
 
     def handle(self, data, context):
