@@ -4,3 +4,4 @@
 --chunk-size 1
 --output-type translation_with_score
 --disable-device-locking
+--use-cpu
