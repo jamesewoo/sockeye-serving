@@ -48,10 +48,10 @@ class SockeyeHandler(object):
         self._context = context
         self._batch_size = context.system_properties['batch_size']
         self.basedir = context.system_properties['model_dir']
-        self.translator = self.get_tranlator(context)
+        self.translator = self.get_translator(context)
         self.initialized = True
 
-    def get_tranlator(self, context):
+    def get_translator(self, context):
         """
         Returns a translator for the given context
         :param context: model server context
@@ -76,7 +76,7 @@ class SockeyeHandler(object):
 
         if sockeye_args.nbest_size > 1:
             if sockeye_args.output_type != const.OUTPUT_HANDLER_JSON:
-                logging.warning(f'For nbest translation, you must specify --output-type {const.OUTPUT_HANDLER_JSON}')
+                logging.warning(f'For n-best translation, you must specify --output-type {const.OUTPUT_HANDLER_JSON}')
                 sockeye_args.output_type = const.OUTPUT_HANDLER_JSON
 
         output_handler = get_output_handler(sockeye_args.output_type,
