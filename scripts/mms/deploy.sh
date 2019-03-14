@@ -47,6 +47,7 @@ function update_model {
 
     # update the scripts and handler files in the export path
     mkdir -p "${model_path}/scripts"
+    cp config/sockeye-args.txt "${model_path}"
     cp -r scripts/joshua/* "${model_path}/scripts"
     cp -r scripts/moses/* "${model_path}/scripts"
     cp -r src/services "${model_path}"
@@ -54,6 +55,8 @@ function update_model {
     # create a new MAR from the updated model files
     model-archiver -f --runtime python3 --export-path "${export_path}" \
         --model-name "${model_name}" --model-path "${model_path}" --handler "${handler}"
+    # update manifest file in original directory
+    unzip -uo "${model_path}.mar" -d "${model_path}"
 }
 
 function deploy_model {
