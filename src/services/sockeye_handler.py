@@ -12,7 +12,6 @@
 import logging
 import os
 from contextlib import ExitStack
-
 from sockeye import arguments
 from sockeye import constants as const
 from sockeye import inference
@@ -77,9 +76,7 @@ class SockeyeHandler(object):
 
         if sockeye_args.nbest_size > 1:
             if sockeye_args.output_type != const.OUTPUT_HANDLER_JSON:
-                logging.warning(
-                    "For nbest translation, you must specify `--output-type '%s'; overriding your setting of '%s'.",
-                    const.OUTPUT_HANDLER_JSON, sockeye_args.output_type)
+                logging.warning(f'For nbest translation, you must specify --output-type {const.OUTPUT_HANDLER_JSON}')
                 sockeye_args.output_type = const.OUTPUT_HANDLER_JSON
 
         output_handler = get_output_handler(sockeye_args.output_type,
@@ -93,7 +90,7 @@ class SockeyeHandler(object):
                                                disable_device_locking=sockeye_args.disable_device_locking,
                                                lock_dir=sockeye_args.lock_dir,
                                                exit_stack=exit_stack)[0]
-            logging.info('Translate Device: %s', translator_ctx)
+            logging.info(f'Translate Device: {translator_ctx}')
 
             models, source_vocabs, target_vocab = inference.load_models(
                 context=translator_ctx,
@@ -140,8 +137,6 @@ class SockeyeHandler(object):
         :param batch: a list of JSON requests of the form { 'text': input_string } or { 'file': file_data }
         :return: a list of input strings to translate
         """
-        logging.info('preprocess grabbed: %s' % batch)
-
         texts = []
         for req in batch:
             data = get_file_data(req)
@@ -164,8 +159,6 @@ class SockeyeHandler(object):
         :param texts: a list of strings to translate
         :return: a list of translation objects from Sockeye
         """
-        logging.info('inference grabbed: %s' % texts)
-
         if texts:
             trans_inputs = []
             for t in texts:
@@ -189,8 +182,6 @@ class SockeyeHandler(object):
         :param outputs: a list of translation objects from Sockeye
         :return: a list of translations of the form: { 'translation': output_string }
         """
-        logging.info('postprocess grabbed: %s' % outputs)
-
         res = []
         for t in outputs:
             output = self.postprocessor.run(t)
