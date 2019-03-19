@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+source scripts/sockeye-serving.properties
+
+function restart_docker {
+    "${docker_exec}" rm -f "${container_name}"
+    "${docker_exec}" run -itd --name "${container_name}" \
+        -p "${pred_port}:${docker_pred_port}" -p "${mgmt_port}:${docker_mgmt_port}" \
+        -v "${export_path}:/opt/ml/model" "${docker_image}"
+}
+
+function deploy_model {
+    if (( $# != 1 )); then
+        echo "usage: deploy MODEL_NAME"
+        exit 1
+    fi
+
+    local model_name="$1"
+
+    until curl -X POST "${mgmt_url}/models?synchronous=true&initial_workers=1&url=${model_name}"
+    do
+      echo "Waiting for initialization..."
+      sleep 1
+    done
+}
+
+function get_status {
+    if (( $# != 1 )); then
+        echo "usage: status MODEL_NAME"
+        exit 1
+    fi
+
+    local model_name="$1"
+
+    curl -X GET "${mgmt_url}/models/${model_name}"
+}
+
+function translate {
+    if (( $# != 2 )); then
+        echo "usage: translate MODEL_NAME INPUT_TEXT"
+        exit 1
+    fi
+
+    local model_name="$1"
+    local input_text="$2"
+
+    curl -X POST "${pred_url}/predictions/${model_name}" -H "Content-Type: application/json" \
+        -d "{ \"text\": \"${input_text}\" }"
+}
+
+function update_model {
+    if [[ -z $(command -v model-archiver) ]]; then
+        echo "model-archiver not found - is virtualenv activated?"
+        exit 127
+    fi
+
+    if (( $# != 2 )); then
+        echo "usage: update MODEL_NAME HANDLER"
+        exit 1
+    fi
+
+    # name of the model
+    local model_name="$1"
+    # filename of Python handler
+    local handler="$2"
+    # where the model files live
+    local model_path="${export_path}/${model_name}"
+
+    # update the scripts and handler files in the export path
+    mkdir -p "${model_path}/scripts"
+    cp config/sockeye-args.txt "${model_path}"
+    cp -r scripts/joshua/* "${model_path}/scripts"
+    cp -r scripts/moses/* "${model_path}/scripts"
+    cp -r src/services "${model_path}"
+
+    # create a new MAR from the updated model files
+    model-archiver -f --runtime python3 --export-path "${export_path}" \
+        --model-name "${model_name}" --model-path "${model_path}" --handler "services.${handler}:handle"
+    # update manifest file in original directory
+    unzip -uo "${model_path}.mar" -d "${model_path}"
+}
+
+function show_help {
+    echo "usage: $0 COMMAND [ARGS]"
+    echo "where COMMAND is one of the following:"
+    echo "restart   restart the Docker container"
+    echo "update    update the model archive with source files in the working directory"
+    echo "deploy    load a model onto the server"
+    echo "status    checks the status of a model"
+    echo "translate translates text"
+}
+
+if [[ "$1" = "restart" ]]; then
+    shift 1
+    restart_docker
+elif [[ "$1" = "update" ]]; then
+    shift 1
+    update_model $@
+elif [[ "$1" = "deploy" ]]; then
+    shift 1
+    deploy_model $@
+elif [[ "$1" = "status" ]]; then
+    shift 1
+    get_status $@
+elif [[ "$1" = "translate" ]]; then
+    shift 1
+    translate $@
+else
+    show_help
+fi
