@@ -162,7 +162,7 @@ map["help"]="show_help"
 if [[ ! -z ${map["$1"]} ]]; then
     cmd=${map["$1"]}
     shift 1
-    "$cmd" $@
+    "$cmd" "$@"
 else
     show_help
 fi
