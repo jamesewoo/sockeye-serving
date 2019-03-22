@@ -2,14 +2,22 @@
 
 source scripts/sockeye-serving.properties
 
-function restart_docker {
-    "${docker_exec}" rm -f "${container_name}"
+start_docker() {
     "${docker_exec}" run -itd --name "${container_name}" \
         -p "${pred_port}:${docker_pred_port}" -p "${mgmt_port}:${docker_mgmt_port}" \
         -v "${export_path}:/opt/ml/model" "${docker_image}"
 }
 
-function deploy_model {
+stop_docker() {
+    "${docker_exec}" rm -f "${container_name}"
+}
+
+restart_docker() {
+    stop_docker
+    start_docker
+}
+
+deploy_model() {
     if (( $# != 1 )); then
         echo "usage: deploy MODEL_NAME"
         exit 1
@@ -24,7 +32,22 @@ function deploy_model {
     done
 }
 
-function get_status {
+remove_model() {
+    if (( $# != 1 )); then
+        echo "usage: rm MODEL_NAME"
+        exit 1
+    fi
+
+    local model_name="$1"
+
+    curl -X DELETE "${mgmt_url}/models/${model_name}"
+}
+
+list_models() {
+    curl -X GET "${mgmt_url}/models"
+}
+
+get_status() {
     if (( $# != 1 )); then
         echo "usage: status MODEL_NAME"
         exit 1
@@ -35,7 +58,7 @@ function get_status {
     curl -X GET "${mgmt_url}/models/${model_name}"
 }
 
-function translate {
+translate() {
     if (( $# != 2 )); then
         echo "usage: translate MODEL_NAME INPUT_TEXT"
         exit 1
@@ -48,7 +71,38 @@ function translate {
         -d "{ \"text\": \"${input_text}\" }"
 }
 
-function update_model {
+translate_file() {
+    if (( $# != 2 )); then
+        echo "usage: translate MODEL_NAME FILE"
+        exit 1
+    fi
+
+    local model_name="$1"
+    local text_file="$2"
+
+    curl -X POST "${pred_url}/predictions/${model_name}" -T "${text_file}"
+}
+
+update_model() {
+    if (( $# != 1 )); then
+        echo "usage: update MODEL_NAME"
+        exit 1
+    fi
+
+    # name of the model
+    local model_name="$1"
+    # where the model files live
+    local model_path="${export_path}/${model_name}"
+
+    # update the scripts and handler files in the export path
+    mkdir -p "${model_path}/scripts"
+    cp config/sockeye-args.txt "${model_path}"
+    cp -r scripts/joshua/* "${model_path}/scripts"
+    cp -r scripts/moses/* "${model_path}/scripts"
+    cp -r src/services "${model_path}"
+}
+
+archive_model() {
     if [[ -z $(command -v model-archiver) ]]; then
         echo "model-archiver not found - is virtualenv activated?"
         exit 127
@@ -66,13 +120,6 @@ function update_model {
     # where the model files live
     local model_path="${export_path}/${model_name}"
 
-    # update the scripts and handler files in the export path
-    mkdir -p "${model_path}/scripts"
-    cp config/sockeye-args.txt "${model_path}"
-    cp -r scripts/joshua/* "${model_path}/scripts"
-    cp -r scripts/moses/* "${model_path}/scripts"
-    cp -r src/services "${model_path}"
-
     # create a new MAR from the updated model files
     model-archiver -f --runtime python3 --export-path "${export_path}" \
         --model-name "${model_name}" --model-path "${model_path}" --handler "services.${handler}:handle"
@@ -80,31 +127,42 @@ function update_model {
     unzip -uo "${model_path}.mar" -d "${model_path}"
 }
 
-function show_help {
+show_help() {
     echo "usage: $0 COMMAND [ARGS]"
     echo "where COMMAND is one of the following:"
+    echo "start     start the Docker container"
+    echo "stop      stop the Docker container"
     echo "restart   restart the Docker container"
-    echo "update    update the model archive with source files in the working directory"
+    echo "update    update the model directory with source files in the working directory"
+    echo "archive   create a model archive (MAR)"
     echo "deploy    load a model onto the server"
-    echo "status    checks the status of a model"
-    echo "translate translates text"
+    echo "rm        remove a model to free up resources"
+    echo "list      list the registered models"
+    echo "status    check the status of a model"
+    echo "translate translate text"
+    echo "upload    translate a file"
+    echo "help      show this help message"
 }
 
-if [[ "$1" = "restart" ]]; then
+# map commands to function names
+declare -A map
+map["start"]="start_docker"
+map["stop"]="stop_docker"
+map["restart"]="restart_docker"
+map["update"]="update_model"
+map["archive"]="archive_model"
+map["deploy"]="deploy_model"
+map["rm"]="remove_model"
+map["list"]="list_models"
+map["status"]="get_status"
+map["translate"]="translate"
+map["upload"]="translate_file"
+map["help"]="show_help"
+
+if [[ ! -z ${map["$1"]} ]]; then
+    cmd=${map["$1"]}
     shift 1
-    restart_docker
-elif [[ "$1" = "update" ]]; then
-    shift 1
-    update_model $@
-elif [[ "$1" = "deploy" ]]; then
-    shift 1
-    deploy_model $@
-elif [[ "$1" = "status" ]]; then
-    shift 1
-    get_status $@
-elif [[ "$1" = "translate" ]]; then
-    shift 1
-    translate $@
+    "$cmd" $@
 else
     show_help
 fi
