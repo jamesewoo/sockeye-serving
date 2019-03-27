@@ -109,7 +109,7 @@ archive_model() {
     fi
 
     if (( $# != 2 )); then
-        echo "usage: update MODEL_NAME HANDLER"
+        echo "usage: archive MODEL_NAME HANDLER"
         exit 1
     fi
 
@@ -144,25 +144,31 @@ show_help() {
     echo "help      show this help message"
 }
 
-# map commands to function names
-declare -A map
-map["start"]="start_docker"
-map["stop"]="stop_docker"
-map["restart"]="restart_docker"
-map["update"]="update_model"
-map["archive"]="archive_model"
-map["deploy"]="deploy_model"
-map["rm"]="remove_model"
-map["list"]="list_models"
-map["status"]="get_status"
-map["translate"]="translate"
-map["upload"]="translate_file"
-map["help"]="show_help"
-
-if [[ ! -z ${map["$1"]} ]]; then
-    cmd=${map["$1"]}
-    shift 1
-    "$cmd" "$@"
+if [[ "$1" = "start" ]]; then
+    cmd="start_docker"
+elif [[ "$1" = "stop" ]]; then
+    cmd="stop_docker"
+elif [[ "$1" = "restart" ]]; then
+    cmd="restart_docker"
+elif [[ "$1" = "update" ]]; then
+    cmd="update_model"
+elif [[ "$1" = "archive" ]]; then
+    cmd="archive_model"
+elif [[ "$1" = "deploy" ]]; then
+    cmd="deploy_model"
+elif [[ "$1" = "rm" ]]; then
+    cmd="remove_model"
+elif [[ "$1" = "list" ]]; then
+    cmd="list_models"
+elif [[ "$1" = "status" ]]; then
+    cmd="get_status"
+elif [[ "$1" = "translate" ]]; then
+    cmd="translate"
+elif [[ "$1" = "upload" ]]; then
+    cmd="translate_file"
 else
-    show_help
+    cmd="show_help"
 fi
+
+shift 1
+"$cmd" "$@"
