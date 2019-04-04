@@ -31,7 +31,7 @@ RUN python3 -m venv venv && \
 COPY config/config.properties .
 COPY scripts/mms/dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
 
-EXPOSE 8080 8081
+EXPOSE 8080 8081 8443 8444
 
 USER model-server
 ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]
