@@ -87,7 +87,7 @@ def main():
     deploy_parser.add_argument('-d', '--max-batch-delay', help='max delay for batch aggregation', type=int)
     deploy_parser.add_argument('-i', '--initial-workers', help='number of initial workers to create', type=int,
                                default=1)
-    deploy_parser.add_argument('-s', '--synchronous', choices=['true', 'false'],
+    deploy_parser.add_argument('-s', '--synchronous', action='store_true',
                                help='whether or not the request is synchronous')
     deploy_parser.add_argument('-t', '--timeout', dest='response_timeout', help='timeout for inference', type=int)
     deploy_parser.set_defaults(request=cli.deploy_model)
@@ -110,8 +110,7 @@ def main():
     scale_parser.add_argument('-a', '--min-worker', help='minimum number of workers', type=int)
     scale_parser.add_argument('-b', '--max-worker', help='maximum number of workers', type=int)
     scale_parser.add_argument('-n', '--gpus', dest='number_gpu', help='number of GPU workers to create', type=int)
-    scale_parser.add_argument('-s', '--synchronous', choices=['true', 'false'],
-                              help='whether or not the call is synchronous')
+    scale_parser.add_argument('-s', '--synchronous', action='store_true', help='whether or not the call is synchronous')
     scale_parser.add_argument('-t', '--timeout', help='wait time for a worker to complete all pending requests',
                               type=int)
     scale_parser.set_defaults(request=cli.scale_workers)
