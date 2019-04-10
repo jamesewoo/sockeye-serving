@@ -99,7 +99,7 @@ update_model() {
     cp config/sockeye-args.txt "${model_path}"
     cp -r scripts/joshua/* "${model_path}/scripts"
     cp -r scripts/moses/* "${model_path}/scripts"
-    cp -r src/services "${model_path}"
+    cp -r src/serving "${model_path}"
 }
 
 archive_model() {
@@ -122,7 +122,7 @@ archive_model() {
 
     # create a new MAR from the updated model files
     model-archiver -f --runtime python3 --export-path "${export_path}" \
-        --model-name "${model_name}" --model-path "${model_path}" --handler "services.${handler}:handle"
+        --model-name "${model_name}" --model-path "${model_path}" --handler "serving.${handler}:handle"
     # update manifest file in original directory
     unzip -uo "${model_path}.mar" -d "${model_path}"
 }

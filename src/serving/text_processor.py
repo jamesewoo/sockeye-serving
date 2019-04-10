@@ -1,7 +1,8 @@
 import html
 import os
-import regex as re
 from html.entities import html5, name2codepoint
+
+import regex as re
 from subword_nmt.apply_bpe import BPE
 
 from .utils import run_subprocess

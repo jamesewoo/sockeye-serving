@@ -12,6 +12,7 @@
 import logging
 import os
 from contextlib import ExitStack
+
 from sockeye import arguments
 from sockeye import constants as const
 from sockeye import inference
