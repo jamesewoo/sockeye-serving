@@ -7,7 +7,7 @@ verify_ssl = true
 pytest = "*"
 regex = "*"
 sockeye = "*"
-sockeye-serving = {editable = true,path = "."}
+sockeye-serving = {editable = true, path = "."}
 subword-nmt = "*"
 
 [packages]

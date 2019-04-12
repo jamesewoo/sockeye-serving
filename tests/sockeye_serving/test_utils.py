@@ -1,5 +1,6 @@
 import pytest
-import serving.utils as utils
+
+from sockeye_serving import utils
 
 
 @pytest.fixture

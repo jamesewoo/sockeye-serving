@@ -79,11 +79,11 @@ A better model trained on more data returns this response:
 ```
 
 ## Command Line Interface
-You can use `scripts/sockeye-serving` to easily start and stop Docker and to make REST calls to both the management and prediction APIs.
-Configurable properties are located in `scripts/sockeye-serving.properties`.
+You can use `scripts/sockeye_serving` to easily start and stop Docker and to make REST calls to both the management and prediction APIs.
+Configurable properties are located in `scripts/sockeye_serving.properties`.
 To show the help message for the script, run:
 ```bash
-scripts/sockeye-serving help
+scripts/sockeye_serving help
 ```
 
 ### Switching between CPUs and GPUs
@@ -92,8 +92,8 @@ If the flag `--use-cpu` is in `config/sockeye-args.txt`, then CPUs will be used 
 Otherwise, GPUs will be used.
 After changing the configuration, update the model and deploy it:
 ```bash
-scripts/sockeye-serving update zh
-scripts/sockeye-serving deploy zh
+scripts/sockeye_serving update zh
+scripts/sockeye_serving deploy zh
 ```
 
 ## Enabling TLS
