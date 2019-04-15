@@ -1,5 +1,4 @@
-import os
-
+import pkg_resources
 import regex as re
 
 from .sockeye_handler import SockeyeHandler
@@ -39,7 +38,7 @@ class ChineseHandler(SockeyeHandler):
 
     def initialize(self, context):
         super().initialize(context)
-        scripts_path = os.path.join(self.basedir, 'scripts')
+        scripts_path = pkg_resources.resource_filename('sockeye_serving', 'scripts')
         self.preprocessor = ChineseCharPreprocessor(scripts_path)
         self.postprocessor = Detokenizer(scripts_path)
 

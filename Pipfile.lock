@@ -259,11 +259,11 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:13c5e9fb5ec5179995e9357111ab089af350d788cbc944c628f3cde72285809b",
-                "sha256:f21d2f1fb8200830dcbb5d8ec466a9c9120e20d8b53c7585d180125cce1d297a"
+                "sha256:3773f4c235918987d51daf1db66d51c99fac654c81d6f2f709a046ab446d5e5d",
+                "sha256:b7802283b70ca24d7119b32915efa7c409982f59913c1a6c0640aacf118b95f5"
             ],
             "index": "pypi",
-            "version": "==4.4.0"
+            "version": "==4.4.1"
         },
         "pyyaml": {
             "hashes": [
@@ -284,18 +284,18 @@
         },
         "regex": {
             "hashes": [
-                "sha256:10d3b831687227b6d43f07a4ac116cb098bfc0d80bdc5050830162b30b89e89c",
-                "sha256:159030565b09de6dbfdd7b5433b17753542d919546c4dc1ad43133b0e2cc9347",
-                "sha256:252ac3cc58392fe7b686b9863b61f87df3808c9adf26d9b69a426bce65a97945",
-                "sha256:7ca6e9b1d8757af3d8e23bd21391a3362a53c644d60931853da7f8d072e6b3ff",
-                "sha256:80765e6e23bf1b5a34e81f21ee269f4084decbc4ffae972375e0d158e6cdcede",
-                "sha256:b4ff5b2eb1d27ae773f4091ef38ebeee0586680c4af1a595ef8201d139971f69",
-                "sha256:bae4de1b3d605cf7ddd8acc89a1365b65def6812bcc9b902bb536bad6a2ed3bf",
-                "sha256:fb3d59527aa19722ef1db8fd8781d6fe4980f21dd574a9ea2b2eec6992d28aa5",
-                "sha256:fd8ca70c1403b2789702132242e5ae3c900b2fcdc478fdf19396d4b168e9b353"
+                "sha256:020429dcf9b76cc7648a99c81b3a70154e45afebc81e0b85364457fe83b525e4",
+                "sha256:0552802b1c3f3c7e4fee8c85e904a13c48226020aa1a0593246888a1ac55aaaf",
+                "sha256:308965a80b92e1fec263ac1e4f1094317809a72bc4d26be2ec8a5fd026301175",
+                "sha256:4d627feef04eb626397aa7bdec772774f53d63a1dc7cc5ee4d1bd2786a769d19",
+                "sha256:93d1f9fcb1d25e0b4bd622eeba95b080262e7f8f55e5b43c76b8a5677e67334c",
+                "sha256:c3859bbf29b1345d694f069ddfe53d6907b0393fda5e3794c800ad02902d78e9",
+                "sha256:d56ce4c7b1a189094b9bee3b81c4aeb3f1ba3e375e91627ec8561b6ab483d0a8",
+                "sha256:ebc5ef4e10fa3312fa1967dc0a894e6bd985a046768171f042ac3974fadc9680",
+                "sha256:f9cd39066048066a4abe4c18fb213bc541339728005e72263f023742fb912585"
             ],
             "index": "pypi",
-            "version": "==2019.4.12"
+            "version": "==2019.4.14"
         },
         "requests": {
             "hashes": [
