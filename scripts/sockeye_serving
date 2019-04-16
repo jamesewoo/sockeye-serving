@@ -95,10 +95,7 @@ update_model() {
     local model_path="${export_path}/${model_name}"
 
     # update the scripts and handler files in the export path
-    mkdir -p "${model_path}/scripts"
     cp config/sockeye-args.txt "${model_path}"
-    cp -r scripts/joshua/* "${model_path}/scripts"
-    cp -r scripts/moses/* "${model_path}/scripts"
     cp -r src/sockeye_serving "${model_path}"
 }
 
