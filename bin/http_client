@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import os
 from argparse import Namespace
 
 import requests
@@ -28,14 +29,24 @@ class HttpClient:
         self.prediction_url = None
         self.proxies = {}
         self.timeout = 30
+        self.initialized = False
 
     def load_config(self, file: str):
-        config = yaml.safe_load(open(file, 'r'))
+        try:
+            with open(file, 'r') as stream:
+                config = yaml.safe_load(stream)
+        except IOError:
+            return
 
-        self.management_url = config['management_url']
-        self.prediction_url = config['prediction_url']
+        self.management_url = config.get('management_url')
+        self.prediction_url = config.get('prediction_url')
         self.proxies = config.get('proxies', self.proxies)
         self.timeout = config.get('timeout', self.timeout)
+
+        if not self.management_url or not self.prediction_url:
+            return
+
+        self.initialized = True
 
     def deploy_model(self, args: Namespace):
         payload = copy_args(args,
@@ -73,9 +84,9 @@ class HttpClient:
 
 def main():
     cli = HttpClient()
-    cli.load_config('config/http-client.yaml')
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--config', help='path to the config file')
     parser.add_argument('-v', '--verbose', help='add more output', action='store_true')
     parser.set_defaults(request=None)
     subparsers = parser.add_subparsers(help='available sub-commands')
@@ -128,6 +139,16 @@ def main():
     upload_parser.set_defaults(request=cli.upload)
 
     args = parser.parse_args()
+
+    if args.config:
+        cli.load_config(args.config)
+    else:
+        file = os.path.join(os.curdir, 'http_client.yaml')
+        cli.load_config(file)
+
+    if not cli.initialized:
+        print('Config file missing or incomplete. Use --config to specify a location.')
+        exit(1)
 
     if args.request:
         r = args.request(args)
