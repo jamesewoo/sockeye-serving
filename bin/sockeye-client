@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import os
 from argparse import Namespace
 
 import requests
@@ -143,7 +142,7 @@ def main():
     if args.config:
         cli.load_config(args.config)
     else:
-        file = os.path.join(os.curdir, 'http_client.yaml')
+        file = 'sockeye-client.yml'
         cli.load_config(file)
 
     if not cli.initialized:
