@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
-source scripts/sockeye_serving.properties
+# Look in the current directory for a config file
+config="sockeye-serving.conf"
+
+if [[ -f "${config}" ]]; then
+    source "${config}"
+else
+    echo "${config} not found in current directory"
+    exit 1
+fi
 
 start_docker() {
     "${docker_exec}" run -itd --name "${container_name}" \
