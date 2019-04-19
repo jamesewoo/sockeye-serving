@@ -1,8 +1,8 @@
 FROM nvidia/cuda:10.0-cudnn7-runtime
 
-ENV TEMP=/home/model-server/tmp
-ENV SOCKEYE_VERSION=1.18.93
 ENV PYTHONUNBUFFERED TRUE
+ENV SOCKEYE_VERSION=1.18.93
+ENV TEMP=/home/model-server/tmp
 
 RUN useradd -m model-server && \
     mkdir -p $TEMP && \
@@ -11,7 +11,7 @@ RUN useradd -m model-server && \
 WORKDIR /home/model-server
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     build-essential \
     python3-dev \
     python3-venv \
