@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 
-# Look in the current directory for a config file
+# Look for config file in:
+# 1) current directory
+# 2) SOCKEYE_SERVING_CONF environment variable
 config="sockeye-serving.conf"
 
 if [[ -f "${config}" ]]; then
     source "${config}"
+elif [[ -f ${SOCKEYE_SERVING_CONF} ]]; then
+    source "${SOCKEYE_SERVING_CONF}"
 else
-    echo "${config} not found in current directory"
+    echo "${config} not found in current directory or in SOCKEYE_SERVING_CONF"
     exit 1
 fi
 
