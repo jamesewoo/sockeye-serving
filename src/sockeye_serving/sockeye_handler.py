@@ -107,17 +107,52 @@ class SockeyeHandler(object):
                 override_dtype=sockeye_args.override_dtype,
                 output_scores=output_handler.reports_score(),
                 sampling=sockeye_args.sample)
+
             restrict_lexicon = None
-            if sockeye_args.restrict_lexicon:
-                restrict_lexicon = TopKLexicon(source_vocabs[0], target_vocab)
-                restrict_lexicon.load(sockeye_args.restrict_lexicon, k=sockeye_args.restrict_lexicon_topk)
+            if sockeye_args.restrict_lexicon is not None:
+                logging.info(str(sockeye_args.restrict_lexicon))
+                if len(sockeye_args.restrict_lexicon) == 1:
+                    # Single lexicon used for all inputs
+                    restrict_lexicon = TopKLexicon(source_vocabs[0], target_vocab)
+                    # Handle a single arg of key:path or path (parsed as path:path)
+                    restrict_lexicon.load(sockeye_args.restrict_lexicon[0][1], k=sockeye_args.restrict_lexicon_topk)
+                else:
+                    check_condition(sockeye_args.json_input,
+                                    'JSON input is required when using multiple lexicons for vocabulary restriction')
+                    # Multiple lexicons with specified names
+                    restrict_lexicon = dict()
+                    for key, path in sockeye_args.restrict_lexicon:
+                        lexicon = TopKLexicon(source_vocabs[0], target_vocab)
+                        lexicon.load(path, k=sockeye_args.restrict_lexicon_topk)
+                        restrict_lexicon[key] = lexicon
+
             store_beam = sockeye_args.output_type == const.OUTPUT_HANDLER_BEAM_STORE
+
+            brevity_penalty_weight = sockeye_args.brevity_penalty_weight
+            if sockeye_args.brevity_penalty_type == const.BREVITY_PENALTY_CONSTANT:
+                if sockeye_args.brevity_penalty_constant_length_ratio > 0.0:
+                    constant_length_ratio = sockeye_args.brevity_penalty_constant_length_ratio
+                else:
+                    constant_length_ratio = sum(model.length_ratio_mean for model in models) / len(models)
+                    logging.info(
+                        f'Using average of constant length ratios saved in the model configs: {constant_length_ratio}')
+            elif sockeye_args.brevity_penalty_type == const.BREVITY_PENALTY_LEARNED:
+                constant_length_ratio = -1.0
+            elif sockeye_args.brevity_penalty_type == const.BREVITY_PENALTY_NONE:
+                brevity_penalty_weight = 0.0
+                constant_length_ratio = -1.0
+            else:
+                raise ValueError(f'Unknown brevity penalty type {sockeye_args.brevity_penalty_type}')
+
+            brevity_penalty = None
+            if brevity_penalty_weight != 0.0:
+                brevity_penalty = inference.BrevityPenalty(brevity_penalty_weight)
+
             return inference.Translator(context=translator_ctx,
                                         ensemble_mode=sockeye_args.ensemble_mode,
                                         bucket_source_width=sockeye_args.bucket_width,
-                                        length_penalty=inference.LengthPenalty(
-                                            sockeye_args.length_penalty_alpha,
-                                            sockeye_args.length_penalty_beta),
+                                        length_penalty=inference.LengthPenalty(sockeye_args.length_penalty_alpha,
+                                                                               sockeye_args.length_penalty_beta),
                                         beam_prune=sockeye_args.beam_prune,
                                         beam_search_stop=sockeye_args.beam_search_stop,
                                         nbest_size=sockeye_args.nbest_size,
@@ -129,7 +164,9 @@ class SockeyeHandler(object):
                                         store_beam=store_beam,
                                         strip_unknown_words=sockeye_args.strip_unknown_words,
                                         skip_topk=sockeye_args.skip_topk,
-                                        sample=sockeye_args.sample)
+                                        sample=sockeye_args.sample,
+                                        constant_length_ratio=constant_length_ratio,
+                                        brevity_penalty=brevity_penalty)
 
     def preprocess(self, batch):
         """
