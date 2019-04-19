@@ -1,4 +1,4 @@
-FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
+FROM nvidia/cuda:10.0-cudnn7-runtime
 
 ENV TEMP=/home/model-server/tmp
 ENV SOCKEYE_VERSION=1.18.93
@@ -25,7 +25,7 @@ RUN python3 -m venv venv && \
     . venv/bin/activate && \
     pip install --no-cache-dir -U pip setuptools wheel && \
     pip install --no-cache-dir sockeye==$SOCKEYE_VERSION \
-        --no-deps -r requirements/sockeye/requirements.gpu-cu92.txt && \
+        --no-deps -r requirements/sockeye/requirements.gpu-cu100.txt && \
     pip install --no-cache-dir -r requirements/sockeye-serving/requirements.txt
 
 COPY config/config.properties .
