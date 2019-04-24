@@ -6,7 +6,7 @@ Any Sockeye model can be loaded via the management API.
 Text preprocessing is built into the request pipeline and supports a wide variety of languages.
 Specialized processing for specific languages can be implemented using custom handlers.
 
-## Getting Started With Docker
+## Quickstart
 This example shows how to serve an existing model for Chinese to English translation.
 First, pull the latest Docker image:
 ```bash
@@ -78,23 +78,75 @@ A better model trained on more data returns this response:
 }
 ```
 
-## Command Line Interface
-You can use `bin/sockeye-serving` to easily start and stop Docker and to make REST calls to both the management and prediction APIs.
-Configurable properties are located in `config/sockeye-serving.conf`.
-To show the help message for the script, run:
+## Installation
+To install `sockeye-serving` run the following in a virtual environment:
 ```bash
-sockeye-serving help
+pip install sockeye-serving
 ```
+If you want to install from source, a `Pipfile` is provided.
+Clone the repository and run `pipenv install`.
 
-### Switching between CPUs and GPUs
-You can use the command line interface to specify that a model should use either CPUs or GPUs.
-If the flag `--use-cpu` is in `config/sockeye-args.txt`, then CPUs will be used for translation.
-Otherwise, GPUs will be used.
-After changing the configuration, update the model and deploy it:
+Installation places the command line interfaces `sockeye-serving` and `sockeye-client` on your virtual environment's path.
+
+## Command Line Interfaces
+You can use `sockeye-serving` to easily start Docker and to make REST calls to both the management and prediction APIs.
+First, a configuration file must be placed in either the current directory or some place referenced by `SOCKEYE_SERVING_CONF`.
+Example properties are located in `config/sockeye-serving.conf`.
+Here's some basic usage:
 ```bash
-sockeye-serving update zh
-sockeye-serving deploy zh
+# start the Docker container
+sockeye-serving start
+
+# deploy a model
+sockeye-seving deploy zh
+
+# list available models
+sockeye-serving list
+
+# translate text
+sockeye-serving translate zh "my text"
+
+# upload a file for translation
+sockeye-serving upload zh "my_file.txt"
 ```
+Run `sockeye-serving help` for a full list of commands.
+
+The Python client takes a YAML configuration file.
+An example configuration is in `config/sockeye-client.yml`. 
+This client does not support restarting Docker, however, it does exercise the full API provided by `mxnet-model-server`.
+The commands which accept query parameters are below:
+```bash
+$ sockeye-client deploy -h
+usage: sockeye-client deploy [-h] [-m MODEL_NAME] [-x HANDLER] [-r RUNTIME]
+                             [-b BATCH_SIZE] [-d MAX_BATCH_DELAY]
+                             [-i INITIAL_WORKERS] [-s] [-t RESPONSE_TIMEOUT]
+                             url
+...
+
+$ sockeye-client list -h
+usage: sockeye-client list [-h] [-l LIMIT] [-t NEXT_PAGE_TOKEN]
+...
+
+$ sockeye-client scale -h
+usage: sockeye-client scale [-h] [-a MIN_WORKER] [-b MAX_WORKER]
+                            [-n NUMBER_GPU] [-s] [-t TIMEOUT]
+                            model_name
+...
+```
+Run `sockeye-client -h` to show a full list of commands. 
+For more information on the API, see [additional documentation](#additional-documentation) for `mxnet-model-server`.
+
+## Jupyter Notebook
+If you want to translate text with Jupyter, you can use `notebooks/machine_translation.ipynb`.
+Make sure `requests` is installed in your Python environment.
+
+## Choosing between CPUs and GPUs
+`sockeye-serving` provides two Dockerfiles, one for CPUs and one for GPUs.
+You can easily configure which tag to use in your `sockeye-serving.conf` file.
+If using GPUs, you should set `docker_exec="nvidia-docker"`
+
+For CPUs, you must ensure that each model directory contains a `sockeye-args.txt` with the flag `--use-cpu`.
+After changing the file, redeploy the model. Restarting Docker is not necessary.
 
 ## Enabling TLS
 The provided configuration instructs the server to use plain HTTP.
@@ -128,7 +180,7 @@ docker run -itd --name sockeye_serving -p 8443:8443 -p 8444:8444 \
 
 To make requests using `curl` you should ensure that you set `--cert`, `--key`, and `--cacert` as needed.
 
-## Additional Documentation
+## <a name="additional-documentation"></a> Additional Documentation
 
 For more information on `mxnet-model-server`, see:
 * https://github.com/awslabs/mxnet-model-server/tree/master/docs
