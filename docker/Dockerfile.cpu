@@ -36,7 +36,7 @@ USER model-server
 ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]
 CMD ["serve"]
 
-LABEL version="1.0.0" \
+LABEL version="1.0.1" \
       maintainer="james.e.woo@gmail.com" \
       source="https://github.com/jamesewoo/sockeye-serving" \
-      description="Sockeye server based on mxnet-model-server"
+      description="A containerized service for neural machine translation"

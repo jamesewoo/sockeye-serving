@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='sockeye-serving',
-    version='1.0.0',
+    version='1.0.1',
     author="James Woo",
     author_email="james.e.woo@gmail.com",
     description="A containerized service for neural machine translation",
