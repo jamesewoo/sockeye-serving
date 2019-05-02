@@ -1,0 +1,173 @@
+!ModelConfig
+config_data: !DataConfig
+  data_statistics: !DataStatistics
+    average_len_target_per_bucket:
+    - 2.0
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+    buckets:
+    - !!python/tuple
+      - 10
+      - 10
+    - !!python/tuple
+      - 20
+      - 20
+    - !!python/tuple
+      - 30
+      - 30
+    - !!python/tuple
+      - 40
+      - 40
+    - !!python/tuple
+      - 50
+      - 50
+    - !!python/tuple
+      - 60
+      - 60
+    - !!python/tuple
+      - 70
+      - 70
+    - !!python/tuple
+      - 80
+      - 80
+    - !!python/tuple
+      - 90
+      - 90
+    - !!python/tuple
+      - 100
+      - 100
+    - !!python/tuple
+      - 101
+      - 101
+    length_ratio_mean: 1.0
+    length_ratio_stats_per_bucket:
+    - !!python/tuple
+      - 1.0
+      - 0.0
+    - &id001 !!python/tuple
+      - null
+      - null
+    - *id001
+    - *id001
+    - *id001
+    - *id001
+    - *id001
+    - *id001
+    - *id001
+    - *id001
+    - *id001
+    length_ratio_std: 0.0
+    max_observed_len_source: 2
+    max_observed_len_target: 2
+    num_discarded: 0
+    num_sents: 1
+    num_sents_per_bucket:
+    - 1
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    num_tokens_source: 2
+    num_tokens_target: 2
+    num_unks_source: 0
+    num_unks_target: 0
+    size_vocab_source: 5
+    size_vocab_target: 5
+  max_seq_len_source: 101
+  max_seq_len_target: 101
+  num_source_factors: 1
+  source_with_eos: true
+config_decoder: !RecurrentDecoderConfig
+  attention_config: !AttentionConfig
+    config_coverage: null
+    dtype: float32
+    input_previous_word: false
+    is_scaled: false
+    layer_normalization: false
+    num_heads: null
+    num_hidden: 2
+    query_num_hidden: 2
+    source_num_hidden: 2
+    type: dot
+  attention_in_upper_layers: true
+  context_gating: false
+  dtype: float32
+  enc_last_hidden_concat_to_embedding: false
+  hidden_dropout: 0.2
+  layer_normalization: false
+  max_seq_len_source: 101
+  rnn_config: !RNNConfig
+    cell_type: lstm
+    dropout_inputs: 0.0
+    dropout_recurrent: 0.0
+    dropout_states: 0.0
+    dtype: float32
+    first_residual_layer: 2
+    forget_bias: 0.0
+    lhuc: false
+    num_hidden: 2
+    num_layers: 8
+    residual: false
+  state_init: last
+  state_init_lhuc: false
+config_embed_source: !EmbeddingConfig
+  dropout: 0.2
+  dtype: float32
+  factor_configs: null
+  num_embed: 1
+  num_factors: 1
+  source_factors_combine: concat
+  vocab_size: 5
+config_embed_target: !EmbeddingConfig
+  dropout: 0.2
+  dtype: float32
+  factor_configs: null
+  num_embed: 1
+  num_factors: 1
+  source_factors_combine: concat
+  vocab_size: 5
+config_encoder: !RecurrentEncoderConfig
+  conv_config: null
+  dtype: float32
+  reverse_input: false
+  rnn_config: !RNNConfig
+    cell_type: lstm
+    dropout_inputs: 0.0
+    dropout_recurrent: 0.0
+    dropout_states: 0.0
+    dtype: float32
+    first_residual_layer: 2
+    forget_bias: 0.0
+    lhuc: false
+    num_hidden: 2
+    num_layers: 8
+    residual: false
+config_length_task: null
+config_length_task_loss: null
+config_loss: !LossConfig
+  label_smoothing: 0.1
+  length_task_link: null
+  length_task_weight: 1.0
+  name: cross-entropy
+  normalization_type: valid
+  vocab_size: 5
+lhuc: false
+vocab_source_size: 5
+vocab_target_size: 5
+weight_normalization: false
+weight_tying: false
+weight_tying_type: null

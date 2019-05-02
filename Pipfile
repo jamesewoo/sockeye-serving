@@ -12,7 +12,7 @@ subword-nmt = "*"
 
 [packages]
 mxnet-model-server = "*"
-pyyaml = "*"
+pyyaml = "==3.12"
 requests = "*"
 
 [requires]

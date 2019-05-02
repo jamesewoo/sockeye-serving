@@ -65,7 +65,7 @@ def read_sockeye_args(params_path):
 
 def run_subprocess(text, args):
     """
-    Runs a subprocess that process text
+    Runs a subprocess that processes text
     :param text: input text
     :param args: command line arguments
     :return: processed text
