@@ -12,7 +12,6 @@ config_data: !DataConfig
     - null
     - null
     - null
-    - null
     buckets:
     - !!python/tuple
       - 10
@@ -44,9 +43,6 @@ config_data: !DataConfig
     - !!python/tuple
       - 100
       - 100
-    - !!python/tuple
-      - 101
-      - 101
     length_ratio_mean: 1.0
     length_ratio_stats_per_bucket:
     - !!python/tuple
@@ -55,7 +51,6 @@ config_data: !DataConfig
     - &id001 !!python/tuple
       - null
       - null
-    - *id001
     - *id001
     - *id001
     - *id001
@@ -80,15 +75,14 @@ config_data: !DataConfig
     - 0
     - 0
     - 0
-    - 0
     num_tokens_source: 2
     num_tokens_target: 2
     num_unks_source: 0
     num_unks_target: 0
     size_vocab_source: 5
     size_vocab_target: 5
-  max_seq_len_source: 101
-  max_seq_len_target: 101
+  max_seq_len_source: 100
+  max_seq_len_target: 100
   num_source_factors: 1
   source_with_eos: true
 config_decoder: !RecurrentDecoderConfig
@@ -102,14 +96,14 @@ config_decoder: !RecurrentDecoderConfig
     num_hidden: 2
     query_num_hidden: 2
     source_num_hidden: 2
-    type: dot
-  attention_in_upper_layers: true
+    type: mlp
+  attention_in_upper_layers: false
   context_gating: false
   dtype: float32
   enc_last_hidden_concat_to_embedding: false
   hidden_dropout: 0.2
   layer_normalization: false
-  max_seq_len_source: 101
+  max_seq_len_source: 100
   rnn_config: !RNNConfig
     cell_type: lstm
     dropout_inputs: 0.0
@@ -120,12 +114,12 @@ config_decoder: !RecurrentDecoderConfig
     forget_bias: 0.0
     lhuc: false
     num_hidden: 2
-    num_layers: 8
+    num_layers: 1
     residual: false
   state_init: last
   state_init_lhuc: false
 config_embed_source: !EmbeddingConfig
-  dropout: 0.2
+  dropout: 0.0
   dtype: float32
   factor_configs: null
   num_embed: 1
@@ -133,7 +127,7 @@ config_embed_source: !EmbeddingConfig
   source_factors_combine: concat
   vocab_size: 5
 config_embed_target: !EmbeddingConfig
-  dropout: 0.2
+  dropout: 0.0
   dtype: float32
   factor_configs: null
   num_embed: 1
@@ -154,7 +148,7 @@ config_encoder: !RecurrentEncoderConfig
     forget_bias: 0.0
     lhuc: false
     num_hidden: 2
-    num_layers: 8
+    num_layers: 1
     residual: false
 config_length_task: null
 config_length_task_loss: null
