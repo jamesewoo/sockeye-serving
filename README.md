@@ -98,7 +98,7 @@ Here's some basic usage:
 sockeye-serving start
 
 # deploy a model
-sockeye-seving deploy zh
+sockeye-serving deploy zh
 
 # list available models
 sockeye-serving list
