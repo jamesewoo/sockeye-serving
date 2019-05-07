@@ -6,13 +6,13 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 regex = "*"
-sockeye = "*"
+sockeye = ">=1.18.97"
 sockeye-serving = {editable = true, path = "."}
 subword-nmt = "*"
 
 [packages]
 mxnet-model-server = "*"
-pyyaml = "==3.12"
+pyyaml = ">=5.1"
 requests = "*"
 
 [requires]
