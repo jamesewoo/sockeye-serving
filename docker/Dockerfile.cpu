@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
 ENV PYTHONUNBUFFERED TRUE
-ENV SOCKEYE_VERSION=1.18.93
+ENV SOCKEYE_VERSION=1.18.97
 ENV TEMP=/home/model-server/tmp
 
 RUN useradd -m model-server && \
