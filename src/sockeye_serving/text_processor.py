@@ -96,7 +96,8 @@ class JoshuaPreprocessor(TextProcessor):
         self.cleaner = os.path.join(scripts_path, 'remove-non-printing-char.perl')
 
         for f in [self.normalizer, self.tokenizer, self.cleaner]:
-            os.chmod(f, 0o755)
+            if not os.access(f, os.X_OK):
+                os.chmod(f, 0o755)
 
     def run(self, text):
         text = self.unescape(text)
@@ -116,7 +117,8 @@ class Detokenizer(TextProcessor):
         self.de_bpe = re.compile('@@( |$)', re.IGNORECASE)
         self.de_tok = os.path.join(scripts_path, 'detokenize.pl')
 
-        os.chmod(self.de_tok, 0o755)
+        if not os.access(self.de_tok, os.X_OK):
+            os.chmod(self.de_tok, 0o755)
 
     def run(self, text):
         text = re.sub(self.de_bpe, '', text.strip())
