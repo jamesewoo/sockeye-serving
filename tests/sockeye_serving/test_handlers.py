@@ -17,21 +17,25 @@ def my_ctx():
                    mms_version='1.0.3')
 
 
-def check_initialize(handler: sockeye_handler.SockeyeHandler, context: Context):
+def run_test(handler: sockeye_handler.SockeyeHandler, context: Context):
     handler.initialize(context)
     assert handler.initialized
     assert handler.translator
     assert handler.preprocessor
     assert handler.postprocessor
 
+    response = handler.handle([{'body': 'a b c 123'}], context)
+    assert len(response) == 1
+    assert response[0].get('translation')
+
 
 def test_default_handler(my_ctx):
-    check_initialize(default_handler.DefaultHandler(), my_ctx)
+    run_test(default_handler.DefaultHandler(), my_ctx)
 
 
 def test_ko_handler(my_ctx):
-    check_initialize(ko_handler.KoreanHandler(), my_ctx)
+    run_test(ko_handler.KoreanHandler(), my_ctx)
 
 
 def test_zh_handler(my_ctx):
-    check_initialize(zh_handler.ChineseHandler(), my_ctx)
+    run_test(zh_handler.ChineseHandler(), my_ctx)
