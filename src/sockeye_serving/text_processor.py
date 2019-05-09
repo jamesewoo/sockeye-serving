@@ -1,6 +1,7 @@
 import html
 import os
 from html.entities import html5, name2codepoint
+from typing import List
 
 import regex as re
 from subword_nmt.apply_bpe import BPE
@@ -104,6 +105,22 @@ class JoshuaPreprocessor(TextProcessor):
         return run_subprocess(text,
                               [self.normalizer, self.lang, '|', self.cleaner, '|', self.tokenizer, '-l', self.lang,
                                '-no-escape', '-q'])
+
+
+class ProcessorChain(TextProcessor):
+    """
+    A list of text processors that run sequentially
+    """
+
+    def __init__(self, chain: List[TextProcessor]):
+        super().__init__()
+
+        self.chain = chain
+
+    def run(self, text: str) -> str:
+        for processor in self.chain:
+            text = processor.run(text)
+        return text
 
 
 class Detokenizer(TextProcessor):
