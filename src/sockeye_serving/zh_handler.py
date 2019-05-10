@@ -15,7 +15,7 @@ class ChineseCharPreprocessor(JoshuaPreprocessor):
         super().__init__(scripts_path, 'zh')
 
         self.pattern = re.compile(
-            '([\p{IsHan}\p{InCJK_Symbols_and_Punctuation}\p{InCJK_Radicals_Supplement}\p{InCJK_Compatibility}])',
+            r'([\p{IsHan}\p{InCJK_Symbols_and_Punctuation}\p{InCJK_Radicals_Supplement}\p{InCJK_Compatibility}])',
             re.UNICODE)
 
     def run(self, text):
