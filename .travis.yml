@@ -12,5 +12,4 @@ install:
   - pip3 install -U pip pipenv
   - pipenv install -d
 script:
-  - pipenv shell
-  - pytest
+  - pytest || pipenv run pytest
