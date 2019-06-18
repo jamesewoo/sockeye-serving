@@ -96,18 +96,20 @@ translate_file() {
 }
 
 update_model() {
-    if (( $# != 1 )); then
-        echo "usage: update MODEL_NAME"
+    if (( $# != 2 )); then
+        echo "usage: update MODEL_NAME CONFIG_FILE"
         exit 1
     fi
 
     # name of the model
     local model_name="$1"
+    # sockeye config file
+    local config_file="$2"
     # where the model files live
     local model_path="${export_path}/${model_name}"
 
     # update the scripts and handler files in the export path
-    cp config/sockeye-args.txt "${model_path}"
+    cp "$config_file" "${model_path}"
     cp -r src/sockeye_serving "${model_path}"
 }
 
