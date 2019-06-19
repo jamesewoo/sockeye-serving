@@ -1,15 +1,10 @@
+dist: xenial   # required for Python >= 3.7
 language: python
-matrix:
-  include:
-    - name: "Python 3.7.1 on Xenial Linux"
-      python: 3.7           # this works for Linux but is ignored on macOS or Windows
-      dist: xenial          # required for Python >= 3.7
-    - name: "Python 3.7.2 on macOS"
-      os: osx
-      osx_image: xcode10.2  # Python 3.7.2 running on macOS 10.14.3
-      language: shell       # 'language: python' is an error on Travis CI macOS
+python:
+  - "3.6"
+  - "3.7"
 install:
   - pip3 install -U pip pipenv
   - pipenv install -d
 script:
-  - pytest || pipenv run pytest
+  - pipenv run pytest
