@@ -58,7 +58,7 @@ The response should look like this:
 }
 ```
 
-To translate text use the inference API. Notice that the port is different from above. 
+To translate text use the inference API. Notice that the port is different from above.
 ```bash
 curl -X POST "http://localhost:8080/predictions/zh" -H "Content-Type: application/json" \
     -d '{ "text": "我的世界是一款開放世界遊戲，玩家沒有具體要完成的目標，即玩家有超高的自由度選擇如何玩遊戲" }'
@@ -79,7 +79,7 @@ A better model trained on more data returns this response:
 ```
 
 ## Installation
-To install `sockeye-serving` run the following in a virtual environment:
+To install the command line clients for `sockeye-serving` run the following in a virtual environment:
 ```bash
 pip install sockeye-serving
 ```
@@ -112,7 +112,7 @@ sockeye-serving upload zh "my_file.txt"
 Run `sockeye-serving help` for a full list of commands.
 
 The Python client takes a YAML configuration file.
-An example configuration is in `config/sockeye-client.yml`. 
+An example configuration is in `config/sockeye-client.yml`.
 This client does not support restarting Docker, however, it does exercise the full API provided by `mxnet-model-server`.
 The commands which accept query parameters are below:
 ```bash
@@ -133,7 +133,7 @@ usage: sockeye-client scale [-h] [-a MIN_WORKER] [-b MAX_WORKER]
                             model_name
 ...
 ```
-Run `sockeye-client -h` to show a full list of commands. 
+Run `sockeye-client -h` to show a full list of commands.
 For more information on the API, see [additional documentation](#additional-documentation) for `mxnet-model-server`.
 
 ## Jupyter Notebook
@@ -141,12 +141,36 @@ If you want to translate text with Jupyter, you can use `notebooks/machine_trans
 Make sure `requests` is installed in your Python environment.
 
 ## Choosing between CPUs and GPUs
-`sockeye-serving` provides two Dockerfiles, one for CPUs and one for GPUs.
-You can easily configure which tag to use in your `sockeye-serving.conf` file.
-If using GPUs, you should set `docker_exec="nvidia-docker"`
+`sockeye-serving` provides different image tags for CPUs and GPUs.
+You can set the desired tag in your `sockeye-serving.conf` file.
+You'll also need to specify a Sockeye config file `sockeye-args.txt`.
+This file contains arguments passed to the Sockeye translation engine.
+Example files for both CPU and GPU configs are under `config/sockeye`.
 
-For CPUs, you must ensure that each model directory contains a `sockeye-args.txt` with the flag `--use-cpu`.
-After changing the file, redeploy the model. Restarting Docker is not necessary.
+To use GPUs, ensure `nvidia-docker` is installed on the host machine.
+In `sockeye-serving.conf` set the image tag to one with "gpu" in its name, such as `latest-gpu`, and set `docker_exec="nvidia-docker"`.
+Then run `sockeye-serving update MODEL_NAME config/sockeye/gpu/sockeye-args.txt`.
+
+For CPUs, use a tag without "gpu" in its name, such as `latest`, and use the CPU version of the Sockeye config file.
+The changes to `sockeye-serving.conf` will be picked up when you run `sockeye-serving start`.
+
+## Initializing Models
+Each model must be initialized with a `MANIFEST.json` file in order for `mxnet-model-server` to deploy it.
+An easy way to initialize a model is to run `sockeye-serving archive MODEL_NAME HANDLER`, where `HANDLER` is the name of a Python handler module under `src/sockeye_serving`.
+The provided handlers include `ko_handler` (Korean), `zh_handler` (Chinese), and `default_handler` (generic).
+After running the archive command, your model directory should have a file `MAR-INF/MANIFEST.json` that looks like:
+```json
+{
+  "runtime": "python3",
+  "model": {
+    "modelName": "zho",
+    "handler": "sockeye_serving.zh_handler:handle"
+  },
+  "modelServerVersion": "1.0",
+  "implementationVersion": "1.0",
+  "specificationVersion": "1.0"
+}
+```
 
 ## Enabling TLS
 The provided configuration instructs the server to use plain HTTP.
