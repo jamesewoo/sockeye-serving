@@ -1,8 +1,9 @@
+import os
 import pkg_resources
 import regex as re
 
 from .sockeye_handler import SockeyeHandler
-from .text_processor import JoshuaPreprocessor, Detokenizer
+from .text_processor import Detokenizer, JoshuaPreprocessor, ProcessorChain, BpeEncoder
 from .utils import run_subprocess
 
 
@@ -37,7 +38,13 @@ class KoreanHandler(SockeyeHandler):
     def initialize(self, context):
         super().initialize(context)
         scripts_path = pkg_resources.resource_filename('sockeye_serving', 'scripts')
-        self.preprocessor = KoreanPreprocessor(scripts_path)
+        bpe_codes = os.path.join(self.basedir, 'bpe-codes.txt')
+
+        preprocessors = [KoreanPreprocessor(scripts_path)]
+        if os.path.isfile(bpe_codes):
+            preprocessors.append(BpeEncoder(bpe_codes))
+
+        self.preprocessor = ProcessorChain(preprocessors)
         self.postprocessor = Detokenizer(scripts_path)
 
 

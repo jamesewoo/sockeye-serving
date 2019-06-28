@@ -1,12 +1,13 @@
+import os
 import pkg_resources
 import regex as re
 
 from .sockeye_handler import SockeyeHandler
-from .text_processor import JoshuaPreprocessor, Detokenizer
+from .text_processor import Detokenizer, JoshuaPreprocessor, ProcessorChain, BpeEncoder
 from .utils import run_subprocess
 
 
-class ChineseCharPreprocessor(JoshuaPreprocessor):
+class ChinesePreprocessor(JoshuaPreprocessor):
     """
     Preprocesses Chinese text
     """
@@ -39,7 +40,13 @@ class ChineseHandler(SockeyeHandler):
     def initialize(self, context):
         super().initialize(context)
         scripts_path = pkg_resources.resource_filename('sockeye_serving', 'scripts')
-        self.preprocessor = ChineseCharPreprocessor(scripts_path)
+        bpe_codes = os.path.join(self.basedir, 'bpe-codes.txt')
+
+        preprocessors = [ChinesePreprocessor(scripts_path)]
+        if os.path.isfile(bpe_codes):
+            preprocessors.append(BpeEncoder(bpe_codes))
+
+        self.preprocessor = ProcessorChain(preprocessors)
         self.postprocessor = Detokenizer(scripts_path)
 
 
