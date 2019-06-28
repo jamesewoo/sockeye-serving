@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='sockeye-serving',
-    version='1.1.0',
+    version='2.0.0',
     author="James Woo",
     author_email="james.e.woo@gmail.com",
     description="A containerized service for neural machine translation",
@@ -24,7 +24,7 @@ setup(
                 ('notebooks', glob(os.path.join('notebooks', '*')))],
     include_package_data=True,
     classifiers=[
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Perl",
         "Programming Language :: Unix Shell",
         "License :: OSI Approved :: Apache Software License",

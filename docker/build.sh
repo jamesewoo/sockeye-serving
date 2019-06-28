@@ -12,10 +12,13 @@ docker_user=jwoo11
 cd "$sockeye_serving_home"
 
 docker build -t sockeye-serving:latest -f docker/cpu/Dockerfile .
-docker build -t sockeye-serving:latest-gpu -f docker/gpu/Dockerfile .
-
 docker tag sockeye-serving:latest "$docker_user/sockeye-serving:latest"
-docker tag sockeye-serving:latest-gpu "$docker_user/sockeye-serving:latest-gpu"
-
 docker push "$docker_user/sockeye-serving:latest"
+
+docker build -t sockeye-serving:latest-gpu -f docker/gpu/Dockerfile .
+docker tag sockeye-serving:latest-gpu "$docker_user/sockeye-serving:latest-gpu"
 docker push "$docker_user/sockeye-serving:latest-gpu"
+
+docker build -t sockeye-serving:test -f docker/test/Dockerfile docker/test
+docker tag sockeye-serving:test "$docker_user/sockeye-serving:test"
+docker push "$docker_user/sockeye-serving:test"

@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+
+[packages]
+mxnet-cu100mkl = "==1.4.1"
+mxnet-model-server = "*"
+numpy = ">=1.14"
+portalocker = "*"
+pyyaml = ">=5.1"
+regex = "*"
+sacrebleu = "==1.2.21"
+subword-nmt = "*"
+typing = "*"
+
+[requires]
+python_version = "3.6"

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source venv/bin/activate
+source $HOME/venv/bin/activate
 
 if [[ "$1" = "serve" ]]; then
     shift 1

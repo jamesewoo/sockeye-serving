@@ -1,3 +1,0 @@
-mxnet-model-server
-regex
-subword-nmt
