@@ -1,4 +1,4 @@
-FROM jwoo11/sockeye-serving
+FROM jwoo11/sockeye-serving:latest
 
 USER root
 WORKDIR /home/serving
@@ -32,7 +32,7 @@ RUN pipenv run sockeye-prepare-data \
         -t corpus.tc.BPE.en \
         -o train_data
 
-RUN pipenv run sockeye-train \
+RUN pipenv run python3 -m sockeye.train \
         -d train_data \
         -vs newstest2016.tc.BPE.de \
         -vt newstest2016.tc.BPE.en \
