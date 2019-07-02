@@ -7,7 +7,7 @@ verify_ssl = true
 pytest = "*"
 
 [packages]
-mxnet-cu100mkl = "==1.4.1"
+mxnet-cu101mkl = "==1.4.1"
 mxnet-model-server = "*"
 numpy = ">=1.14"
 portalocker = "*"

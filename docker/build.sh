@@ -23,6 +23,6 @@ docker build -t sockeye-serving:test -f docker/test/cpu/Dockerfile docker/test
 docker tag sockeye-serving:test "$docker_user/sockeye-serving:test"
 docker push "$docker_user/sockeye-serving:test"
 
-docker build -t sockeye-serving:test-gpu -f docker/test/gpu/Dockerfile docker/test
+nvidia-docker build -t sockeye-serving:test-gpu -f docker/test/gpu/Dockerfile docker/test
 docker tag sockeye-serving:test-gpu "$docker_user/sockeye-serving:test-gpu"
 docker push "$docker_user/sockeye-serving:test-gpu"
