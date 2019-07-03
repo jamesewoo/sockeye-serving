@@ -2,7 +2,7 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-    echo "usage: build.sh SOCKEYE_SERVING_HOME"
+    echo "usage: $0 SOCKEYE_SERVING_HOME"
     exit 1
 fi
 
@@ -15,14 +15,6 @@ docker build -t sockeye-serving:latest -f docker/cpu/Dockerfile .
 docker tag sockeye-serving:latest "$docker_user/sockeye-serving:latest"
 docker push "$docker_user/sockeye-serving:latest"
 
-docker build -t sockeye-serving:latest-gpu -f docker/gpu/Dockerfile .
-docker tag sockeye-serving:latest-gpu "$docker_user/sockeye-serving:latest-gpu"
-docker push "$docker_user/sockeye-serving:latest-gpu"
-
 docker build -t sockeye-serving:test -f docker/test/cpu/Dockerfile docker/test
 docker tag sockeye-serving:test "$docker_user/sockeye-serving:test"
 docker push "$docker_user/sockeye-serving:test"
-
-nvidia-docker build -t sockeye-serving:test-gpu -f docker/test/gpu/Dockerfile docker/test
-docker tag sockeye-serving:test-gpu "$docker_user/sockeye-serving:test-gpu"
-docker push "$docker_user/sockeye-serving:test-gpu"
