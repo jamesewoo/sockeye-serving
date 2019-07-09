@@ -1,7 +1,7 @@
 FROM jwoo11/sockeye-serving:latest-gpu
 
 USER root
-WORKDIR /data
+WORKDIR /home/serving
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
