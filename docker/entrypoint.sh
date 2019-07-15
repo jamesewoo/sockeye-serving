@@ -1,11 +1,9 @@
 #!/bin/bash
 set -e
 
-source $HOME/venv/bin/activate
-
 if [[ "$1" = "serve" ]]; then
     shift 1
-    mxnet-model-server --start --mms-config config.properties
+    pipenv run mxnet-model-server --start --mms-config config.properties
 else
     eval "$@"
 fi

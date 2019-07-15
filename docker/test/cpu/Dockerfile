@@ -27,25 +27,6 @@ RUN pipenv run subword-nmt apply-bpe -c bpe.codes --vocabulary bpe.vocab.de --vo
 RUN head -n 200000 corpus.tc.BPE.de > corpus.tc.BPE.de.tmp && mv corpus.tc.BPE.de.tmp corpus.tc.BPE.de \
     && head -n 200000 corpus.tc.BPE.en > corpus.tc.BPE.en.tmp && mv corpus.tc.BPE.en.tmp corpus.tc.BPE.en
 
-RUN pipenv run sockeye-prepare-data \
-        -s corpus.tc.BPE.de \
-        -t corpus.tc.BPE.en \
-        -o train_data
-
-RUN pipenv run python3 -m sockeye.train \
-        -d train_data \
-        -vs newstest2016.tc.BPE.de \
-        -vt newstest2016.tc.BPE.en \
-        --encoder rnn \
-        --decoder rnn \
-        --num-embed 256 \
-        --rnn-num-hidden 512 \
-        --rnn-attention-type dot \
-        --max-seq-len 60 \
-        --decode-and-evaluate 500 \
-        --use-cpu \
-        -o wmt_model
-
 COPY test.sh .
 
 ENTRYPOINT ["./test.sh"]

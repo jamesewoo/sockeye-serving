@@ -27,10 +27,10 @@ RUN pipenv run subword-nmt apply-bpe -c bpe.codes --vocabulary bpe.vocab.de --vo
 RUN head -n 200000 corpus.tc.BPE.de > corpus.tc.BPE.de.tmp && mv corpus.tc.BPE.de.tmp corpus.tc.BPE.de \
     && head -n 200000 corpus.tc.BPE.en > corpus.tc.BPE.en.tmp && mv corpus.tc.BPE.en.tmp corpus.tc.BPE.en
 
-COPY test-gpu.sh .
+COPY test.sh .
 
-ENTRYPOINT ["./test-gpu.sh"]
-CMD ["test"]
+ENTRYPOINT ["./test.sh"]
+CMD ["test-gpu"]
 
 LABEL version="2.0.0" \
       maintainer="james.e.woo@gmail.com" \
