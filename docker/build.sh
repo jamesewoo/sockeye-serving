@@ -8,6 +8,7 @@ fi
 
 sockeye_serving_home="$1"
 docker_user=jwoo11
+version=2.0.0
 model_src=/opt/data/wmt_model
 model_dest=/tmp/models
 
@@ -74,3 +75,16 @@ tag_and_push $tag
 tag=sockeye-serving:test-gpu
 docker build -t $tag -f docker/test/gpu/Dockerfile docker/test
 tag_and_push $tag
+
+# prepare Docker release
+tag=sockeye-serving:"$version"
+docker tag sockeye-serving:latest "$tag"
+tag_and_push $tag
+# GPU version
+tag=sockeye-serving:"$version-gpu"
+docker tag sockeye-serving:latest-gpu "$tag"
+tag_and_push $tag
+
+# prepare PyPI release
+rm -rf build/ dist/
+python3 setup.py sdist bdist_wheel
