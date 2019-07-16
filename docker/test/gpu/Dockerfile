@@ -30,7 +30,7 @@ RUN head -n 200000 corpus.tc.BPE.de > corpus.tc.BPE.de.tmp && mv corpus.tc.BPE.d
 COPY test.sh .
 
 ENTRYPOINT ["./test.sh"]
-CMD ["test-gpu"]
+CMD ["test"]
 
 LABEL version="2.0.0" \
       maintainer="james.e.woo@gmail.com" \

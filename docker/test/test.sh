@@ -29,27 +29,8 @@ train() {
         -o wmt_model
 }
 
-basic_test() {
-    if (( $# != 1 )); then
-        echo "usage: basic_test DEVICE"
-        exit 1
-    fi
-
-    opt=""
-    if [ "$1" = 'cpu' ] ; then
-        opt="--use-cpu"
-    fi
-
-    echo "er ist so ein toller Kerl und ein Familienvater ." \
-    | pipenv run subword-nmt apply-bpe \
-        -c bpe.codes \
-        --vocabulary bpe.vocab.en \
-        --vocabulary-threshold 50 \
-    | pipenv run sockeye-translate -m /opt/ml/model/de $opt \
-    | sed -r 's/@@( |$)//g'
-}
-
 start_server() {
+    cp bpe.codes /opt/ml/model/de/bpe-codes.txt
     pipenv run mxnet-model-server --start --mms-config config.properties
     tail -f /dev/null
 }
@@ -64,12 +45,6 @@ elif [ "$1" = 'train-gpu' ]; then
 
 elif [ "$1" = 'test' ]; then
 
-    # basic_test "cpu"
-    start_server
-
-elif [ "$1" = 'test-gpu' ]; then
-
-    # basic_test "gpu"
     start_server
 
 else
