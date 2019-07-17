@@ -30,7 +30,6 @@ train() {
 }
 
 start_server() {
-    cp bpe.codes /opt/ml/model/de/bpe-codes.txt
     pipenv run mxnet-model-server --start --mms-config config.properties
     tail -f /dev/null
 }

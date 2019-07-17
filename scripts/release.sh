@@ -11,17 +11,17 @@ version="$2"
 
 release() {
     if (( $# != 2 )); then
-        echo "usage: release VERSION ALIAS"
+        echo "usage: release SOURCE ALIAS"
         exit 1
     fi
 
-    local version="$1"
+    local source="$1"
     local alias="$2"
 
-    docker tag "$version" "$alias"
-    docker tag "$version" "$docker_user/$version"
+    docker tag "$source" "$alias"
+    docker tag "$source" "$docker_user/$source"
     docker tag "$alias" "$docker_user/$alias"
-    docker push "$docker_user/$version"
+    docker push "$docker_user/$source"
     docker push "$docker_user/$alias"
 }
 

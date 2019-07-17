@@ -9,6 +9,7 @@ fi
 sockeye_serving_home="$1"
 docker_user=jwoo11
 version=2.1.0
+training_output=/opt/data/wmt_model
 
 export SOCKEYE_SERVING_CONF="$sockeye_serving_home/config/sockeye-serving.conf"
 
@@ -22,9 +23,10 @@ create_model() {
     local dest="$2"
 
     (cd "$src" \
-        && mkdir -p "$dest/de" \
-        && cp -L args.yaml config params.best symbol.json version vocab* "$dest/de")
+        && mkdir -p "$dest" \
+        && cp -L args.yaml config params.best symbol.json version vocab* "$dest")
 
+    cp "$sockeye_serving_home/docker/test/resources/bpe-codes.txt" "$dest"
     pipenv run sockeye-serving update de config/sockeye/cpu/sockeye-args.txt
     pipenv run sockeye-serving archive de default_handler
 }
@@ -38,6 +40,7 @@ test_server() {
     local models_dir="$1"
     local image="$2"
 
+    docker rm -f sockeye_serving
     docker run -itd --name sockeye_serving -p 8080:8080 -p 8081:8081 -v "$models_dir":/opt/ml/model "$image"
 
     until curl -X POST "http://localhost:8081/models?synchronous=true&initial_workers=1&url=de"; do
@@ -74,14 +77,18 @@ tag="sockeye-serving:$version-gpu-devel"
 docker build -t "$tag" -f docker/gpu/Dockerfile .
 tag_and_push "$docker_user" "$tag"
 
+# create a model from training output
+create_model "$training_output" /tmp/models/de
+
 tag=sockeye-serving:test
 docker build -t $tag -f docker/test/cpu/Dockerfile docker/test
-create_model /opt/data/wmt_model /tmp/models
 test_server /tmp/models "$tag"
 tag_and_push "$docker_user" "$tag"
 
 tag=sockeye-serving:test-gpu
 docker build -t "$tag" -f docker/test/gpu/Dockerfile docker/test
+# need libcuda to test on GPU
+# test_server /tmp/models "$tag"
 tag_and_push "$docker_user" "$tag"
 
 # prepare PyPI release
