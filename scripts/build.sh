@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if [ "$#" -ne 1 ]; then
+if (( $# != 1 )); then
     echo "usage: $0 SOCKEYE_SERVING_HOME"
     exit 1
 fi
@@ -9,14 +9,12 @@ fi
 sockeye_serving_home="$1"
 docker_user=jwoo11
 version=2.1.0
-model_src=/opt/data/wmt_model
-model_dest=/tmp/models
 
 export SOCKEYE_SERVING_CONF="$sockeye_serving_home/config/sockeye-serving.conf"
 
 create_model() {
     if (( $# != 2 )); then
-        echo "usage: copy_model SRC DEST"
+        echo "usage: create_model SRC DEST"
         exit 1
     fi
 
@@ -32,9 +30,15 @@ create_model() {
 }
 
 test_server() {
-    create_model "$model_src" "$model_dest"
+    if (( $# != 2 )); then
+        echo "usage: test_server MODELS_DIR IMAGE"
+        exit 1
+    fi
 
-    docker run -itd --name sockeye_serving -p 8080:8080 -p 8081:8081 -v "$model_dest":/opt/ml/model sockeye-serving:test
+    local models_dir="$1"
+    local image="$2"
+
+    docker run -itd --name sockeye_serving -p 8080:8080 -p 8081:8081 -v "$models_dir":/opt/ml/model "$image"
 
     until curl -X POST "http://localhost:8081/models?synchronous=true&initial_workers=1&url=de"; do
       echo "Waiting for initialization..."
@@ -48,12 +52,13 @@ test_server() {
 }
 
 tag_and_push() {
-    if (( $# != 1 )); then
-        echo "usage: tag_and_push TAG"
+    if (( $# != 2 )); then
+        echo "usage: tag_and_push DOCKER_USER TAG"
         exit 1
     fi
 
-    local tag="$1"
+    local docker_user="$1"
+    local tag="$2"
 
     docker tag $tag "$docker_user/$tag"
     docker push "$docker_user/$tag"
@@ -62,22 +67,22 @@ tag_and_push() {
 cd "$sockeye_serving_home"
 
 tag="sockeye-serving:$version-devel"
-docker build -t $tag -f docker/cpu/Dockerfile .
-tag_and_push $tag
+docker build -t "$tag" -f docker/cpu/Dockerfile .
+tag_and_push "$docker_user" "$tag"
 
 tag="sockeye-serving:$version-gpu-devel"
-docker build -t $tag -f docker/gpu/Dockerfile .
-tag_and_push $tag
+docker build -t "$tag" -f docker/gpu/Dockerfile .
+tag_and_push "$docker_user" "$tag"
 
 tag=sockeye-serving:test
 docker build -t $tag -f docker/test/cpu/Dockerfile docker/test
-test_server
-tag_and_push $tag
+create_model /opt/data/wmt_model /tmp/models
+test_server /tmp/models "$tag"
+tag_and_push "$docker_user" "$tag"
 
 tag=sockeye-serving:test-gpu
-docker build -t $tag -f docker/test/gpu/Dockerfile docker/test
-# test_server
-tag_and_push $tag
+docker build -t "$tag" -f docker/test/gpu/Dockerfile docker/test
+tag_and_push "$docker_user" "$tag"
 
 # prepare PyPI release
 rm -rf build/ dist/
