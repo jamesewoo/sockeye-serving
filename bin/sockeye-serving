@@ -131,11 +131,9 @@ archive_model() {
     # where the model files live
     local model_path="${export_path}/${model_name}"
 
-    # create a new MAR from the updated model files
-    model-archiver -f --runtime python3 --export-path "${export_path}" \
+    # create a new MANIFEST.json for the model
+    model-archiver -f --archive-format no-archive --runtime python3 --export-path "${export_path}" \
         --model-name "${model_name}" --model-path "${model_path}" --handler "sockeye_serving.${handler}:handle"
-    # update manifest file in original directory
-    unzip -uo "${model_path}.mar" -d "${model_path}"
 }
 
 show_help() {

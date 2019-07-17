@@ -8,7 +8,7 @@ fi
 
 sockeye_serving_home="$1"
 docker_user=jwoo11
-version=2.0.0
+version=2.1.0
 model_src=/opt/data/wmt_model
 model_dest=/tmp/models
 
@@ -20,8 +20,8 @@ create_model() {
         exit 1
     fi
 
-    src="$1"
-    dest="$2"
+    local src="$1"
+    local dest="$2"
 
     (cd "$src" \
         && mkdir -p "$dest/de" \
@@ -53,17 +53,19 @@ tag_and_push() {
         exit 1
     fi
 
+    local tag="$1"
+
     docker tag $tag "$docker_user/$tag"
     docker push "$docker_user/$tag"
 }
 
 cd "$sockeye_serving_home"
 
-tag=sockeye-serving:latest
+tag="sockeye-serving:$version-devel"
 docker build -t $tag -f docker/cpu/Dockerfile .
 tag_and_push $tag
 
-tag=sockeye-serving:latest-gpu
+tag="sockeye-serving:$version-gpu-devel"
 docker build -t $tag -f docker/gpu/Dockerfile .
 tag_and_push $tag
 
@@ -74,15 +76,7 @@ tag_and_push $tag
 
 tag=sockeye-serving:test-gpu
 docker build -t $tag -f docker/test/gpu/Dockerfile docker/test
-tag_and_push $tag
-
-# prepare Docker release
-tag=sockeye-serving:"$version"
-docker tag sockeye-serving:latest "$tag"
-tag_and_push $tag
-# GPU version
-tag=sockeye-serving:"$version-gpu"
-docker tag sockeye-serving:latest-gpu "$tag"
+# test_server
 tag_and_push $tag
 
 # prepare PyPI release

@@ -31,7 +31,7 @@ EXPOSE 8080 8081 8443 8444
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["serve"]
 
-LABEL version="2.0.0" \
+LABEL version="2.1.0" \
       maintainer="james.e.woo@gmail.com" \
       source="https://github.com/jamesewoo/sockeye-serving" \
       description="A containerized service for neural machine translation"

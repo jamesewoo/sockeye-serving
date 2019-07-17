@@ -12,7 +12,7 @@ def walk(dir):
 
 setup(
     name='sockeye-serving',
-    version='2.0.0',
+    version='2.1.0',
     author="James Woo",
     author_email="james.e.woo@gmail.com",
     description="A containerized service for neural machine translation",
@@ -33,7 +33,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Unix",
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
         "Topic :: Scientific/Engineering :: Artificial Intelligence"
     ]
