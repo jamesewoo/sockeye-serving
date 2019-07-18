@@ -69,24 +69,16 @@ tag_and_push() {
 
 cd "$sockeye_serving_home"
 
+# create a model from training output
+create_model "$training_output" /tmp/models/de
+
 tag="sockeye-serving:$version-devel"
 docker build -t "$tag" -f docker/cpu/Dockerfile .
+test_server /tmp/models "$tag"
 tag_and_push "$docker_user" "$tag"
 
 tag="sockeye-serving:$version-gpu-devel"
 docker build -t "$tag" -f docker/gpu/Dockerfile .
-tag_and_push "$docker_user" "$tag"
-
-# create a model from training output
-create_model "$training_output" /tmp/models/de
-
-tag=sockeye-serving:test
-docker build -t $tag -f docker/test/cpu/Dockerfile docker/test
-test_server /tmp/models "$tag"
-tag_and_push "$docker_user" "$tag"
-
-tag=sockeye-serving:test-gpu
-docker build -t "$tag" -f docker/test/gpu/Dockerfile docker/test
 # need libcuda to test on GPU
 # test_server /tmp/models "$tag"
 tag_and_push "$docker_user" "$tag"
