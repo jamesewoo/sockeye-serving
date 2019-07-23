@@ -19,7 +19,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jamesewoo/sockeye-serving",
-    install_requires=['mxnet-model-server', 'pyyaml', 'requests'],
+    install_requires=['model-archiver', 'pyyaml', 'requests'],
     packages=find_packages('src'),
     package_dir={'': 'src'},
     package_data={'sockeye_serving': ['scripts/*', 'scripts/nonbreaking_prefixes/*']},

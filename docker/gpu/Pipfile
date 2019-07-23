@@ -13,7 +13,7 @@ numpy = ">=1.14"
 portalocker = "*"
 pyyaml = ">=5.1"
 regex = "*"
-sacrebleu = "==1.2.21"
+sacrebleu = "*"
 subword-nmt = "*"
 typing = "*"
 
