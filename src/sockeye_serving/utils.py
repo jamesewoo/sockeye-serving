@@ -1,8 +1,14 @@
 import re
 import subprocess
 
+from typing import Dict
 
-def decode_bytes(data):
+
+def create_request(input: str) -> Dict:
+    return {'text': input}
+
+
+def decode_bytes(data: bytearray) -> str:
     """
     Decodes a bytes array from a file upload
 
@@ -15,7 +21,7 @@ def decode_bytes(data):
     return res
 
 
-def get_text(req):
+def get_request(req: Dict) -> Dict:
     """
     Returns the text string, if any, in the request
 
@@ -26,13 +32,13 @@ def get_text(req):
         if field in req:
             data = req[field]
             if isinstance(data, str):
-                return data
+                return create_request(data)
             elif isinstance(data, dict) and 'text' in data:
-                return data['text']
+                return data
     return None
 
 
-def get_file_data(req):
+def get_file_data(req: Dict) -> bytearray:
     """
     Returns the file data, if any, in the request
 

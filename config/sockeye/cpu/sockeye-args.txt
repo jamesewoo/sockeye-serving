@@ -2,6 +2,7 @@
 --beam-size 10
 --batch-size 1
 --chunk-size 1
---output-type translation_with_score
 --disable-device-locking
+--output-type json
+--json-input
 --use-cpu

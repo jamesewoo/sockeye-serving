@@ -1,3 +1,4 @@
 --models _blank_
 --beam-size 1
 --use-cpu
+--json-input

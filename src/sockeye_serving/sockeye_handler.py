@@ -20,7 +20,7 @@ from sockeye.lexicon import TopKLexicon
 from sockeye.output_handler import get_output_handler
 from sockeye.utils import check_condition, log_basic_info, determine_context
 
-from .utils import decode_bytes, get_file_data, get_text, read_sockeye_args
+from .utils import create_request, decode_bytes, get_file_data, get_request, read_sockeye_args
 
 
 class SockeyeHandler(object):
@@ -172,35 +172,37 @@ class SockeyeHandler(object):
         """
         Preprocesses a JSON request for translation.
 
-        :param batch: a list of JSON requests of the form { 'text': input_string } or { 'file': file_data }
+        :param batch: a list of JSON requests
         :return: a list of input strings to translate
         """
-        texts = []
-        for req in batch:
-            data = get_file_data(req)
+        reqs = []
+        for x in batch:
+            data = get_file_data(x)
 
             if data:
-                text = decode_bytes(data)
+                r = create_request(decode_bytes(data))
             else:
-                text = get_text(req)
+                r = get_request(x)
 
-            if text:
-                t = self.preprocessor.run(text)
-                texts.append(t)
+            if r and 'text' in r:
+                r['text'] = self.preprocessor.run(r['text'])
+                reqs.append(r)
 
-        return texts
+        return reqs
 
-    def inference(self, texts):
+    def inference(self, reqs):
         """
         Translates the input data.
 
-        :param texts: a list of strings to translate
+        :param reqs: a list of requests to translate
         :return: a list of translation objects from Sockeye
         """
-        if texts:
+        if reqs:
             trans_inputs = []
-            for t in texts:
-                _input = inference.make_input_from_plain_string(self.sentence_id, t)
+            for r in reqs:
+                _input = inference.make_input_from_dict(self.sentence_id,
+                         r,
+                         self.translator)
                 trans_inputs.append(_input)
             outputs = self.translator.translate(trans_inputs)
 
@@ -222,8 +224,9 @@ class SockeyeHandler(object):
         """
         res = []
         for output in outputs:
-            translation = self.postprocessor.run(output.translation)
-            res.append({'translation': translation})
+            d = output.json()
+            d['translation'] = self.postprocessor.run(output.translation)
+            res.append(d)
         return res
 
     def handle(self, data, context):

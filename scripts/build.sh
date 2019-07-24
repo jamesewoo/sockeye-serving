@@ -50,6 +50,8 @@ test_server() {
     curl -X GET "http://localhost:8081/models/de"
     curl -X POST "http://localhost:8080/predictions/de" -H "Content-Type: application/json" \
         -d '{ "text": "er ist so ein toller Kerl und ein Familienvater ." }'
+    curl -X POST "http://localhost:8080/predictions/de" -H "Content-Type: application/json" \
+        -d '{ "text": "er ist so ein toller Kerl und ein Familienvater .", "constraints": ["man"] }'
 
     docker stop sockeye_serving
 }
