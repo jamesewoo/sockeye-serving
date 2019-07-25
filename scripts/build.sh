@@ -40,8 +40,7 @@ test_server() {
     local models_dir="$1"
     local image="$2"
 
-    docker rm -f sockeye_serving
-    docker run -itd --name sockeye_serving -p 8080:8080 -p 8081:8081 -v "$models_dir":/opt/ml/model "$image"
+    docker run -itd --name sockeye_serving_test -p 8080:8080 -p 8081:8081 -v "$models_dir":/opt/ml/model "$image"
 
     until curl -X POST "http://localhost:8081/models?synchronous=true&initial_workers=1&url=de"; do
       echo "Waiting for initialization..."
@@ -52,8 +51,11 @@ test_server() {
         -d '{ "text": "er ist so ein toller Kerl und ein Familienvater ." }'
     curl -X POST "http://localhost:8080/predictions/de" -H "Content-Type: application/json" \
         -d '{ "text": "er ist so ein toller Kerl und ein Familienvater .", "constraints": ["man"] }'
+    curl -X POST "http://localhost:8080/predictions/de" -H "Content-Type: application/json" \
+        -d '{ "text": "er ist so ein toller Kerl und ein Familienvater .", "avoid": ["company"] }'
 
-    docker stop sockeye_serving
+    docker logs sockeye_serving_test > "$image".log
+    docker rm -f sockeye_serving_test
 }
 
 tag_and_push() {
@@ -70,6 +72,8 @@ tag_and_push() {
 }
 
 cd "$sockeye_serving_home"
+
+pipenv run pytest
 
 # create a model from training output
 create_model "$training_output" /tmp/models/de

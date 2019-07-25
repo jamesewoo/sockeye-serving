@@ -73,7 +73,12 @@ class HttpClient:
                             proxies=self.proxies)
 
     def translate(self, args: Namespace):
-        return requests.post(f'{self.prediction_url}/predictions/{args.model_name}', json={'text': args.text},
+        json = {'text': args.text}
+        if args.constraint:
+            json['constraints'] = args.constraint
+        if args.avoid:
+            json['avoid'] = args.avoid
+        return requests.post(f'{self.prediction_url}/predictions/{args.model_name}', json=json,
                              timeout=self.timeout, proxies=self.proxies)
 
     def upload(self, args: Namespace):
@@ -130,6 +135,10 @@ def main():
     translate_parser = subparsers.add_parser('translate', help='translate text')
     translate_parser.add_argument('model_name', help='model name')
     translate_parser.add_argument('text', help='text to translate')
+    translate_parser.add_argument('-c', '--constraint', action='append',
+        help='a single lexical constraint - multiple constraints can be provided')
+    translate_parser.add_argument('-a', '--avoid', action='append',
+        help='a single negative lexical constraint - multiple constraints can be provided')
     translate_parser.set_defaults(request=cli.translate)
 
     upload_parser = subparsers.add_parser('upload', help='upload a file for translation')
