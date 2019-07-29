@@ -50,9 +50,9 @@ test_server() {
     curl -X POST "http://localhost:8080/predictions/de" -H "Content-Type: application/json" \
         -d '{ "text": "er ist so ein toller Kerl und ein Familienvater ." }'
     curl -X POST "http://localhost:8080/predictions/de" -H "Content-Type: application/json" \
-        -d '{ "text": "er ist so ein toller Kerl und ein Familienvater .", "constraints": ["man"] }'
+        -d '{ "text": "er ist so ein toller Kerl und ein Familienvater .", "constraints": ["toller"] }'
     curl -X POST "http://localhost:8080/predictions/de" -H "Content-Type: application/json" \
-        -d '{ "text": "er ist so ein toller Kerl und ein Familienvater .", "avoid": ["company"] }'
+        -d '{ "text": "er ist so ein toller Kerl und ein Familienvater .", "avoid": ["toller"] }'
 
     docker logs sockeye_serving_test > "$image".log
     docker rm -f sockeye_serving_test

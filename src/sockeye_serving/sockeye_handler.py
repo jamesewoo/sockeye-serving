@@ -184,8 +184,14 @@ class SockeyeHandler(object):
             else:
                 r = get_request(x)
 
-            if r and 'text' in r:
-                r['text'] = self.preprocessor.run(r['text'])
+            if r:
+                if 'text' in r:
+                    r['text'] = self.preprocessor.run(r['text'])
+                if 'constraints' in r:
+                    r['constraints'] = [self.preprocessor.run(s) for s in r['constraints']]
+                if 'avoid' in r:
+                    r['avoid'] = [self.preprocessor.run(s) for s in r['avoid']]
+
                 reqs.append(r)
 
         return reqs
