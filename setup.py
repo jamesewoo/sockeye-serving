@@ -6,13 +6,15 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+
 def walk(dir):
     return [(dirname, [os.path.join(dirname, f) for f in files])
             for dirname, _, files in os.walk(dir) if files]
 
+
 setup(
     name='sockeye-serving',
-    version='2.1.0',
+    version='2.1.1',
     author="James Woo",
     author_email="james.e.woo@gmail.com",
     description="A containerized service for neural machine translation",

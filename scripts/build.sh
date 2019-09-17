@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-if (( $# != 1 )); then
-    echo "usage: $0 SOCKEYE_SERVING_HOME"
+if (( $# != 2 )); then
+    echo "usage: $0 SOCKEYE_SERVING_HOME VERSION"
     exit 1
 fi
 
 sockeye_serving_home="$1"
 docker_user=jwoo11
-version=2.1.0
+version="$2"
 training_output=/opt/data/wmt_model
 
 export SOCKEYE_SERVING_CONF="$sockeye_serving_home/config/sockeye-serving.conf"
@@ -78,12 +78,12 @@ pipenv run pytest
 # create a model from training output
 create_model "$training_output" /tmp/models/de
 
-tag="sockeye-serving:$version-devel"
+tag="sockeye-serving:$version"
 docker build -t "$tag" -f docker/cpu/Dockerfile .
 test_server /tmp/models "$tag"
 tag_and_push "$docker_user" "$tag"
 
-tag="sockeye-serving:$version-gpu-devel"
+tag="sockeye-serving:$version-gpu"
 docker build -t "$tag" -f docker/gpu/Dockerfile .
 # need libcuda to test on GPU
 # test_server /tmp/models "$tag"
