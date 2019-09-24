@@ -1,4 +1,4 @@
-FROM jwoo11/sockeye-serving:2.1.0-gpu-devel
+FROM jwoo11/sockeye-serving:latest-gpu
 
 USER root
 WORKDIR /home/serving
