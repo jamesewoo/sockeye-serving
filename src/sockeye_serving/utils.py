@@ -17,7 +17,7 @@ def decode_bytes(data: bytearray) -> str:
     """
     pattern = re.compile('\r', re.UNICODE)
     res = data.decode('utf-8', 'ignore')
-    res = pattern.sub('', res).strip()
+    res = pattern.sub('', res)
     return res
 
 
@@ -76,5 +76,9 @@ def run_subprocess(text, args):
     :param args: command line arguments
     :return: processed text
     """
-    proc = subprocess.run(args, input=text, encoding='utf-8', stdout=subprocess.PIPE)
+    proc = subprocess.run(
+        args,
+        input=text,
+        encoding='utf-8',
+        stdout=subprocess.PIPE)
     return proc.stdout.strip()

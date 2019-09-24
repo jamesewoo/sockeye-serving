@@ -1,13 +1,15 @@
 import os
 import pkg_resources
 import regex as re
+import unicodedata
 
+from .default_handler import DefaultPreprocessor
 from .sockeye_handler import SockeyeHandler
-from .text_processor import Detokenizer, JoshuaPreprocessor, ProcessorChain, BpeEncoder
+from .text_processor import BpeEncoder, DeBPE, Detokenizer, ProcessorChain
 from .utils import run_subprocess
 
 
-class ChinesePreprocessor(JoshuaPreprocessor):
+class ChinesePreprocessor(DefaultPreprocessor):
     """
     Preprocesses Chinese text
     """
@@ -21,15 +23,11 @@ class ChinesePreprocessor(JoshuaPreprocessor):
 
     def run(self, text):
         text = self.unescape(text)
-
-        # normalize and remove non-printing characters
-        text = run_subprocess(text, [self.normalizer, self.lang, '|', self.cleaner])
+        text = unicodedata.normalize('NFKC', text)
+        text = self.remove_control_characters(text)
 
         # tokenize by separating all ZH characters with a space
-        text = self.pattern.sub(r' \1 ', text).strip()
-
-        # tokenize other characters using Moses
-        return run_subprocess(text, [self.tokenizer, '-l', self.lang, '-no-escape', '-q'])
+        return self.pattern.sub(r' \1 ', text).strip()
 
 
 class ChineseHandler(SockeyeHandler):
@@ -39,7 +37,8 @@ class ChineseHandler(SockeyeHandler):
 
     def initialize(self, context):
         super().initialize(context)
-        scripts_path = pkg_resources.resource_filename('sockeye_serving', 'scripts')
+        scripts_path = pkg_resources.resource_filename(
+            'sockeye_serving', 'scripts')
         bpe_codes = os.path.join(self.basedir, 'bpe-codes.txt')
 
         preprocessors = [ChinesePreprocessor(scripts_path)]
@@ -47,7 +46,7 @@ class ChineseHandler(SockeyeHandler):
             preprocessors.append(BpeEncoder(bpe_codes))
 
         self.preprocessor = ProcessorChain(preprocessors)
-        self.postprocessor = Detokenizer(scripts_path)
+        self.postprocessor = DeBPE()
 
 
 _service = ChineseHandler()
